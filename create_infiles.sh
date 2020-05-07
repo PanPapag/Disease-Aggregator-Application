@@ -42,7 +42,7 @@ if [ $NUM_RECORDS_PER_FILE -le 0 ]; then
 	exit 1
 fi
 
-echo -e "${GREEN}[COMPLETED]: ${RESET}Checking arguments.\n"
+echo -e "${GREEN}[COMPLETED]: ${RESET}Checking arguments\n"
 
 # 2. Reading files <diseasesFile> and <countriesFile>
 
@@ -70,7 +70,7 @@ for disease in ${DISEASES}; do
 	echo -e "\t${disease}";
 done
 
-echo -e "${GREEN}[COMPLETED]: ${RESET}Reading \"$DISEASES_FILE\".\n"
+echo -e "${GREEN}[COMPLETED]: ${RESET}Reading \"$DISEASES_FILE\"\n"
 
 # ------------------------------- COUNTRIES_FILE -------------------------------
 if [ -e $COUNTRIES_FILE ]; then                  # exists file
@@ -96,7 +96,7 @@ for country in ${COUNTRIES}; do
 	echo -e "\t${country}";
 done
 
-echo -e "${GREEN}[COMPLETED]: ${RESET}Reading \"$COUNTRIES_FILE\".\n"
+echo -e "${GREEN}[COMPLETED]: ${RESET}Reading \"$COUNTRIES_FILE\"\n"
 
 # 3. Creating input directory
 
@@ -104,9 +104,9 @@ echo "Creating input directory..."
 
 if [ ! -d ${INPUT_DIR} ]; then
     mkdir ${INPUT_DIR}
-    echo -e "${GREEN}[COMPLETED]: ${RESET}Creating input directory \"$INPUT_DIR\".\n"
+    echo -e "${GREEN}[COMPLETED]: ${RESET}Creating input directory \"$INPUT_DIR\"\n"
 else
-  echo -e "${YELLOW}[EXISTS]: ${RESET}Directory \"${INPUT_DIR}\" already exits.\n"
+  echo -e "${YELLOW}[EXISTS]: ${RESET}Directory \"${INPUT_DIR}\" already exits\n"
 fi
 
 # 4. Creating into input directory one sub-directory for each country
@@ -117,26 +117,34 @@ for country in ${COUNTRIES}; do
   SUB_DIR="${INPUT_DIR_PATH}${country}"
   if [ ! -d ${SUB_DIR} ]; then
       mkdir ${SUB_DIR}
-      echo "${GREEN}[COMPLETED]: ${RESET}Creating subdirectory \"$SUB_DIR\"."
+      echo "${GREEN}[COMPLETED]: ${RESET}Creating subdirectory \"${SUB_DIR}\""
   else
-    echo "${YELLOW}[EXISTS]: ${RESET}Directory \"${SUB_DIR}\" already exits."
+    echo "${YELLOW}[EXISTS]: ${RESET}Directory \"${SUB_DIR}\" already exits"
   fi
 done
 
 echo
 
 # 5. Creating files in each subdirectory
-
-start=2014-12-01
-end=2014-12-20
-while ! [[ $start > $end ]]; do
-  echo $start
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    start=$(date -j -v+1d -f %Y-%m-%d $start +%Y-%m-%d)
-  elif [[ "$OSTYPE" == "linux" ]]; then
-    start=$(date -I -d "$start + 1 day")
-  fi
-  echo $start
+echo "Creating files in each country subdirectory..."
+for country in ${COUNTRIES}; do
+  START_DATE=2020-01-01
+  for ((i=1; i <= ${NUM_FILES_PER_DIR}; i++)); do
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      FORMATED_DATE=$(date -j -f %Y-%m-%d ${START_DATE} +%d-%m-%Y)
+      START_DATE=$(date -j -v+1d -f %Y-%m-%d ${START_DATE} +%Y-%m-%d)
+    elif [[ "$OSTYPE" == "linux" ]]; then
+      FORMATED_DATE=$(date --date=${START_DATE} "+%d-%m-%Y")
+      START_DATE=$(date -I --date=${START_DATE}"+1 day")
+    fi
+    FILE_PATH="${INPUT_DIR_PATH}${country}/${FORMATED_DATE}"
+    if [ ! -e ${FILE_PATH} ]; then
+      touch ${FILE_PATH}
+      echo "${GREEN}[COMPLETED]: ${RESET}Creating file \"${FILE_PATH}\""
+    else
+      echo "${YELLOW}[EXISTS]: ${RESET}File \"${FILE_PATH}}\" already exits"
+    fi
+  done
 done
 
 exit 0
