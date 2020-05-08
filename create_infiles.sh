@@ -11,6 +11,7 @@ RED=`tput setaf 1`
 GREEN=`tput setaf 2`
 YELLOW=`tput setaf 3`
 RESET=`tput sgr0`
+NEWLINE=$'\n'
 
 echo -e "Running on: [$OSTYPE]\n"
 
@@ -134,30 +135,28 @@ function create_new_record() {
 
   FIRST_NAME='';
   LEN=$(( ( RANDOM % 12 )  + 3 ))
-  for ((j=1; j <= ${LEN}; j++)); do
-    FIRST_NAME+=$(printf "%s" $(($RANDOM%9)) )
+  for ((k=1; k <= ${LEN}; k++)); do
+    FIRST_NAME+=$(printf "%s" $(($RANDOM%9)) | tr '[0-9]' '[a-j]' )
   done
-  #echo $FIRST_NAME | tr '[0-9]' '[a-j]'
+
+
 
   LAST_NAME='';
   LEN=$(( ( RANDOM % 12 )  + 3 ))
-  for ((j=1; j <= ${LEN}; j++));  do
-    LAST_NAME+=$(printf "%s" $(($RANDOM%9)) )
+  for ((k=1; k <= ${LEN}; k++));  do
+    LAST_NAME+=$(printf "%s" $(($RANDOM%9)) | tr '[0-9]' '[a-j]' )
   done
-  #echo $LAST_NAME | tr '[0-9]' '[a-j]'
 
   NUM_DISEASES=${#DISEASES[@]}
   DISEASE_INDEX=$(( RANDOM % ${NUM_DISEASES} ))
   DISEASE=${DISEASES[${DISEASE_INDEX}]}
-  
+
   AGE=$(( RANDOM % 120 ))
+
+  RECORD="${Record_ID} ${STATUS} ${FIRST_NAME} ${LAST_NAME}  ${DISEASE} ${AGE}"
 }
 
 function update_record() {
-  good=1
-}
-
-function export_record_to_file() {
   good=1
 }
 
@@ -175,21 +174,28 @@ for country in ${COUNTRIES}; do
     FILE_PATH="${INPUT_DIR_PATH}${country}/${FORMATED_DATE}"
     if [ ! -e ${FILE_PATH} ]; then
       touch ${FILE_PATH}
-      if [ $i -eq 1 ]; then
-        create_new_record
-      else
-        # We define a probability 0.8 to generate a new record
-        # Otherwise, select in random an established Record_ID and provide
-        # EXIT attribute
-        THRESHOLD=80
-        PROB=$(( RANDOM % 100 ))
-        if [ $PROB -lt $THRESHOLD ]; then
+      # Write num_records_per_file records in FILE_PATH
+      declare -a RECORDS_ARRAY=()
+      for ((j=1; j <= ${NUM_RECORDS_PER_FILE}; j++)); do
+        if [ $j -eq 1 ]; then
           create_new_record
         else
-          update_record
+          # We define a probability 0.8 to generate a new record
+          # Otherwise, select in random an established Record_ID and provide
+          # EXIT attribute
+          THRESHOLD=80
+          PROB=$(( RANDOM % 100 ))
+          if [ $PROB -lt $THRESHOLD ]; then
+            create_new_record
+          else
+            update_record
+          fi
         fi
-      fi
-      export_record_to_file
+        # Add record to the file's record array
+        RECORDS_ARRAY+=${RECORD}
+        # Export record to the given file path
+        echo ${RECORD} >> ${FILE_PATH}
+      done
       echo "${GREEN}[COMPLETED]: ${RESET}Creating file \"${FILE_PATH}\""
     else
       echo "${YELLOW}[EXISTS]: ${RESET}File \"${FILE_PATH}\" already exits"
