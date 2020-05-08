@@ -139,8 +139,6 @@ function create_new_record() {
     FIRST_NAME+=$(printf "%s" $(($RANDOM%9)) | tr '[0-9]' '[a-j]' )
   done
 
-
-
   LAST_NAME='';
   LEN=$(( ( RANDOM % 12 )  + 3 ))
   for ((k=1; k <= ${LEN}; k++));  do
@@ -153,16 +151,30 @@ function create_new_record() {
 
   AGE=$(( RANDOM % 120 ))
 
-  RECORD="${Record_ID} ${STATUS} ${FIRST_NAME} ${LAST_NAME}  ${DISEASE} ${AGE}"
+  RECORD="${Record_ID} ${STATUS} ${FIRST_NAME} ${LAST_NAME} ${DISEASE} ${AGE}"
 }
 
 function update_record() {
-  good=1
+  TEMP_RECORD=(${RECORDS_ARRAY[${RECORD_UPDATE_INDEX}]})
+  RECORD="${TEMP_RECORD[0]} EXIT ${TEMP_RECORD[2]} ${TEMP_RECORD[3]} ${TEMP_RECORD[4]} ${TEMP_RECORD[5]}"
+  # echo -n ${TEMP_RECORD[0]}
+  # echo -n " "
+  # echo -n ${TEMP_RECORD[2]}
+  # echo -n " "
+  # echo -n ${TEMP_RECORD[3]}
+  # echo -n " "
+  # echo -n ${TEMP_RECORD[4]}
+  # echo -n " "
+  # echo  ${TEMP_RECORD[5]}
+  # echo $RECORD
+  RECORD_UPDATE_INDEX=`expr ${RECORD_UPDATE_INDEX} + 1`
 }
 
 echo "Creating files in each country subdirectory..."
 for country in ${COUNTRIES}; do
   START_DATE=2020-01-01
+  declare -a RECORDS_ARRAY=()
+  RECORD_UPDATE_INDEX=0
   for ((i=1; i <= ${NUM_FILES_PER_DIR}; i++)); do
     if [[ "$OSTYPE" == "darwin"* ]]; then
       FORMATED_DATE=$(date -j -f %Y-%m-%d ${START_DATE} +%d-%m-%Y)
@@ -175,7 +187,6 @@ for country in ${COUNTRIES}; do
     if [ ! -e ${FILE_PATH} ]; then
       touch ${FILE_PATH}
       # Write num_records_per_file records in FILE_PATH
-      declare -a RECORDS_ARRAY=()
       for ((j=1; j <= ${NUM_RECORDS_PER_FILE}; j++)); do
         if [ $j -eq 1 ]; then
           create_new_record
@@ -188,11 +199,15 @@ for country in ${COUNTRIES}; do
           if [ $PROB -lt $THRESHOLD ]; then
             create_new_record
           else
-            update_record
+            if [ ${#RECORDS_ARRAY[@]} -lt ${RECORD_UPDATE_INDEX} ]; then
+              create_new_record
+            else
+              update_record
+            fi
           fi
         fi
         # Add record to the file's record array
-        RECORDS_ARRAY+=${RECORD}
+        RECORDS_ARRAY+=("${RECORD}")
         # Export record to the given file path
         echo ${RECORD} >> ${FILE_PATH}
       done
