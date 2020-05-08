@@ -51,7 +51,7 @@ if [ -e $DISEASES_FILE ]; then                  # exists file
   if [ -f $DISEASES_FILE ]; then                # is a regular file
     if [ -r $DISEASES_FILE ]; then              # have read rights
       echo "Reading \"$DISEASES_FILE\"...";
-      DISEASES=$(cat "$DISEASES_FILE")
+      DISEASES=( $(cat "${DISEASES_FILE}") )
     else
       echo "${RED}[ERROR]: ${RESET}File \"$DISEASES_FILE\" has no reading permissions!"
       exit 1
@@ -126,6 +126,41 @@ done
 echo
 
 # 5. Creating files in each subdirectory
+
+function create_new_record() {
+  Record_ID=$(( RANDOM % 10000 ))
+
+  STATUS="ENTER"
+
+  FIRST_NAME='';
+  LEN=$(( ( RANDOM % 12 )  + 3 ))
+  for ((j=1; j <= ${LEN}; j++)); do
+    FIRST_NAME+=$(printf "%s" $(($RANDOM%9)) )
+  done
+  #echo $FIRST_NAME | tr '[0-9]' '[a-j]'
+
+  LAST_NAME='';
+  LEN=$(( ( RANDOM % 12 )  + 3 ))
+  for ((j=1; j <= ${LEN}; j++));  do
+    LAST_NAME+=$(printf "%s" $(($RANDOM%9)) )
+  done
+  #echo $LAST_NAME | tr '[0-9]' '[a-j]'
+
+  NUM_DISEASES=${#DISEASES[@]}
+  DISEASE_INDEX=$(( RANDOM % ${NUM_DISEASES} ))
+  DISEASE=${DISEASES[${DISEASE_INDEX}]}
+  
+  AGE=$(( RANDOM % 120 ))
+}
+
+function update_record() {
+  good=1
+}
+
+function export_record_to_file() {
+  good=1
+}
+
 echo "Creating files in each country subdirectory..."
 for country in ${COUNTRIES}; do
   START_DATE=2020-01-01
@@ -140,9 +175,24 @@ for country in ${COUNTRIES}; do
     FILE_PATH="${INPUT_DIR_PATH}${country}/${FORMATED_DATE}"
     if [ ! -e ${FILE_PATH} ]; then
       touch ${FILE_PATH}
+      if [ $i -eq 1 ]; then
+        create_new_record
+      else
+        # We define a probability 0.8 to generate a new record
+        # Otherwise, select in random an established Record_ID and provide
+        # EXIT attribute
+        THRESHOLD=80
+        PROB=$(( RANDOM % 100 ))
+        if [ $PROB -lt $THRESHOLD ]; then
+          create_new_record
+        else
+          update_record
+        fi
+      fi
+      export_record_to_file
       echo "${GREEN}[COMPLETED]: ${RESET}Creating file \"${FILE_PATH}\""
     else
-      echo "${YELLOW}[EXISTS]: ${RESET}File \"${FILE_PATH}}\" already exits"
+      echo "${YELLOW}[EXISTS]: ${RESET}File \"${FILE_PATH}\" already exits"
     fi
   done
 done
