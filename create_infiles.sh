@@ -157,16 +157,6 @@ function create_new_record() {
 function update_record() {
   TEMP_RECORD=(${RECORDS_ARRAY[${RECORD_UPDATE_INDEX}]})
   RECORD="${TEMP_RECORD[0]} EXIT ${TEMP_RECORD[2]} ${TEMP_RECORD[3]} ${TEMP_RECORD[4]} ${TEMP_RECORD[5]}"
-  # echo -n ${TEMP_RECORD[0]}
-  # echo -n " "
-  # echo -n ${TEMP_RECORD[2]}
-  # echo -n " "
-  # echo -n ${TEMP_RECORD[3]}
-  # echo -n " "
-  # echo -n ${TEMP_RECORD[4]}
-  # echo -n " "
-  # echo  ${TEMP_RECORD[5]}
-  # echo $RECORD
   RECORD_UPDATE_INDEX=`expr ${RECORD_UPDATE_INDEX} + 1`
 }
 
