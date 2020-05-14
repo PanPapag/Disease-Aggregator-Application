@@ -8,4 +8,8 @@
   */
   void parse_directory_and_update_structures(const char* dir_pathname);
 
+  /* Reports Error Messages */
+  void report_error(const char *fmt, ...);
+  /* Reports Warning Messages */
+  void report_warning(const char *fmt, ...);
 #endif
