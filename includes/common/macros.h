@@ -11,8 +11,6 @@
     ptr = NULL;       \
   } while(0)
 
-  #define BUFFER_SIZE 1025
-
-  #define STRING char*
+  #define MAX_BUFFER_SIZE 1025
 
 #endif

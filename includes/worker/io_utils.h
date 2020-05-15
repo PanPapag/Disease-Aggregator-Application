@@ -3,10 +3,10 @@
 
   /**
     \brief Parses all the files of a given country directory, checks for errors
-    and updates corresponding structures
+    and calls parse_file_and_update_structures
     @param dir_pathname: The relative path to directory
   */
-  void parse_directory_and_update_structures(const char* dir_pathname);
+  void parse_directory(const char* dir_name);
 
   /* Reports Error Messages */
   void report_error(const char *fmt, ...);
