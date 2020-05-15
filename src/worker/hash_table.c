@@ -92,7 +92,7 @@ void __bucket_print(hash_table_ptr hash_table, bucket_ptr bucket, FILE* out) {
 }
 
 hash_table_ptr hash_table_create(size_t ht_entries, size_t bucket_size,
-                                 size_t (*hash_func)(const void*),
+                                 size_t (*hash_func)(void*),
                                  int (*key_cmp_func)(void*, void*),
                                  void (*key_print_func)(void*, FILE*),
                                  void (*value_print_func)(void*, FILE*),

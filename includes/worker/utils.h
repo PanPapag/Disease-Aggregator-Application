@@ -44,7 +44,7 @@
   int is_number(char*);
 
   /* Checks if a date string format is valid */
-  int is_valid_date(char*);
+  int is_valid_date_string(char*);
   /* Checks if a date string format is unspecified aka '-' */
   int is_unspecified_date_string(char*);
   /* Checks if a date in struct tm format is unspecified aka 00-01-1900 */

@@ -27,7 +27,7 @@
     size_t ht_entries_;
     size_t bucket_entries_;
     list_ptr* table_;
-    size_t (*ht_hash_func_)(const void*);
+    size_t (*ht_hash_func_)(void*);
     int (*ht_key_cmp_func_)(void*, void*);
     void (*ht_key_print_func_)(void*, FILE*);
     void (*ht_value_print_func_)(void*, FILE*);
@@ -40,7 +40,7 @@
    hash, compare, print and delete functions.
   */
   hash_table_ptr hash_table_create(size_t, size_t,
-    size_t (*)(const void*), int (*)(void*, void*),
+    size_t (*)(void*), int (*)(void*, void*),
     void (*)(void*, FILE*), void (*)(void*, FILE*),
     void (*)(void*), void (*)(void*));
 
