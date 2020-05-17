@@ -2,6 +2,12 @@
   #define __WORKER_IO_UTILS__
 
   /**
+    Uncomment the line below if you with the enable extensively checking on
+    th records' format
+  */
+  #define PATIENT_RECORD_CHECKING
+
+  /**
     \brief Parses all the files of a given country directory, checks for errors
     and calls parse_file_and_update_structures
     @param dir_pathname: The relative path to directory

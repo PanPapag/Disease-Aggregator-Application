@@ -14,6 +14,7 @@
     INVALID_PATIENT_FIRST_NAME,
     INVALID_PATIENT_LAST_NAME,
     INVALID_DISEASE_ID,
+    INVALID_AGE,
     INVALID_COUNTRY,
     INVALID_ENTRY_DATE,
     INVALID_EXIT_DATE,
@@ -25,6 +26,7 @@
     char* patient_first_name;
     char* patient_last_name;
     char* disease_id;
+    uint8_t age;
     char* country;
     struct tm entry_date;
     struct tm exit_date;

@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <ctype.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,20 +46,21 @@ patient_record_ptr patient_record_create(char** patient_record_tokens) {
     report_error("Could not allocate memory for Patient Record Disease ID. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->disease_id, patient_record_tokens[3]);
+  /* Store age */
+  patient_record->age = atoi(patient_record_tokens[4]);
   /* Allocate memory and store country */
-  patient_record->country = (char*) malloc((strlen(patient_record_tokens[4]) + 1) * sizeof(char));
+  patient_record->country = (char*) malloc((strlen(patient_record_tokens[5]) + 1) * sizeof(char));
   if (patient_record->country == NULL) {
     report_error("Could not allocate memory for Patient Record Country. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->country, patient_record_tokens[4]);
+  strcpy(patient_record->country, patient_record_tokens[5]);
   /* Store entry_date using struct tm format */
   memset(&patient_record->entry_date, 0, sizeof(struct tm));
-  strptime(patient_record_tokens[5], "%d-%m-%Y", &patient_record->entry_date);
+  strptime(patient_record_tokens[6], "%d-%m-%Y", &patient_record->entry_date);
   /* Store exit_date using struct tm format */
   memset(&patient_record->exit_date, 0, sizeof(struct tm));
-  strptime(patient_record_tokens[6], "%d-%m-%Y", &patient_record->exit_date);
+  strptime(patient_record_tokens[7], "%d-%m-%Y", &patient_record->exit_date);
   /* Return patient record pointer */
   return patient_record;
 }
@@ -71,7 +73,7 @@ void patient_record_print(void* v, FILE* out) {
   fprintf(out, "Patient First Name: %s\n", patient_record->patient_first_name);
   fprintf(out, "Patient Last Name: %s\n", patient_record->patient_last_name);
   fprintf(out, "Disease ID: %s\n", patient_record->disease_id);
-  fprintf(out, "Country: %s\n", patient_record->country);
+  fprintf(out, "Age: %" PRIu8 "\n", patient_record->age);
   strftime(entry_date_buffer, sizeof(entry_date_buffer), "%d-%m-%Y", &patient_record->entry_date);
   fprintf(out, "Entry Date: %s\n", entry_date_buffer);
   strftime(exit_date_buffer, sizeof(exit_date_buffer), "%d-%m-%Y", &patient_record->exit_date);
@@ -128,16 +130,22 @@ int validate_patient_record_tokens(char** patient_record_tokens) {
     if (!isalnum(disease_id[i]) && disease_id[i] != '-')
       return INVALID_DISEASE_ID;
   }
+  /* Age: Only numbers */
+  char* age = patient_record_tokens[4];
+  for (size_t i = 0; i < strlen(age); ++i) {
+    if (!isalnum(age[i]))
+      return INVALID_AGE;
+  }
   /* country: Only letters */
-  char* country = patient_record_tokens[4];
+  char* country = patient_record_tokens[5];
   if (!is_alphabetical(country))
     return INVALID_COUNTRY;
   /* entry_date: DD-MM-YYYY format */
-  char* entry_date = patient_record_tokens[5];
+  char* entry_date = patient_record_tokens[6];
   if (!is_valid_date_string(entry_date))
     return INVALID_ENTRY_DATE;
   /* exit_date: DD-MM-YYYY format or - (not specified) */
-  char* exit_date = patient_record_tokens[6];
+  char* exit_date = patient_record_tokens[7];
   if (!is_valid_date_string(exit_date) && !is_unspecified_date_string(exit_date)) {
     return INVALID_EXIT_DATE;
   }
@@ -170,22 +178,26 @@ void print_patient_record_error(char** patient_record_tokens, int code) {
       report_warning("Invalid Disease ID: <%s> format. Discarding patient record.",
                      patient_record_tokens[3]);
       break;
+    case INVALID_AGE:
+      report_warning("Invalid Age: <%s> format. Discarding patient record.",
+                     patient_record_tokens[4]);
+      break;
     case INVALID_COUNTRY:
       report_warning("Invalid Country: <%s> format. Discarding patient record.",
-                     patient_record_tokens[4]);
+                     patient_record_tokens[5]);
       break;
     case INVALID_ENTRY_DATE:
       report_warning("Invalid Entry Date: <%s> format. Discarding patient record.",
-                     patient_record_tokens[5]);
+                     patient_record_tokens[6]);
       break;
     case INVALID_EXIT_DATE:
       report_warning("Invalid Exit Date: <%s> format. Discarding patient record.",
-                     patient_record_tokens[6]);
+                     patient_record_tokens[7]);
       break;
     case INVALID_EARLIER_EXIT_DATE:
       report_warning("Invalid Exit Date: <%s> is earlier than Entry Date <%s>. "
                      "Discarding patient record.",
-                     patient_record_tokens[6], patient_record_tokens[5]);
+                     patient_record_tokens[7], patient_record_tokens[6]);
       break;
   }
 }

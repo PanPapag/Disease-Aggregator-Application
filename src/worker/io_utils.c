@@ -9,6 +9,7 @@
 #include <sys/types.h>
 
 #include "../../includes/common/macros.h"
+#include "../../includes/worker/commands.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/utils.h"
 
@@ -54,11 +55,10 @@ void parse_file_and_update_structures(const char* file_path, const char* date) {
   while (fgets(buffer, sizeof(buffer), fp) != NULL) {
     /* Discard '\n' that fgets() stores */
     buffer[strlen(buffer) - 1] = '\0';
-    printf("%s\n", buffer);
     wordexp(buffer, &p, 0);
     patient_record_tokens = p.we_wordv;
     patient_record_no_tokens = p.we_wordc;
-  
+    execute_insert_patient_record(patient_record_tokens);
     /* Free wordexp object */
     wordfree(&p);
   }
