@@ -211,3 +211,11 @@ char* get_country(patient_record_ptr patient_record) {
 char* get_disease_id(patient_record_ptr patient_record) {
   return patient_record->disease_id;
 }
+
+struct tm get_entry_date(patient_record_ptr patient_record) {
+  return patient_record->entry_date;
+}
+
+struct tm get_exit_date(patient_record_ptr patient_record) {
+  return patient_record->exit_date;
+}

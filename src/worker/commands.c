@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "../../includes/common/macros.h"
 #include "../../includes/worker/avl.h"
@@ -21,20 +22,22 @@ list_ptr diseases_names;
 list_ptr countries_names;
 
 static inline
-int __count_patients_between(avl_node_ptr current_root, int* counter,
-                             struct tm date1, struct tm date2, char* country) {
+int __count_patients_between(avl_node_ptr current_root,
+                             struct tm (*cmp_field)(patient_record_ptr),
+                             int* counter, struct tm date1, struct tm date2,
+                             char* country) {
 
   avl_node_ptr temp = current_root;
   patient_record_ptr patient_record = NULL;
   /* Prune left search below this node as all entries have entry date < date1 */
   if (temp != NULL) {
     patient_record = (patient_record_ptr) temp->data_;
-    if (compare_date_tm(date1, patient_record->entry_date) <= 0) {
-      __count_patients_between(temp->left_, counter, date1, date2, country);
+    if (compare_date_tm(date1, cmp_field(patient_record)) <= 0) {
+      __count_patients_between(temp->left_, cmp_field, counter, date1, date2, country);
     }
     patient_record = (patient_record_ptr) temp->data_;
     /* Check if patient_record exit date is not specified */
-    if (compare_date_tm(patient_record->entry_date, date2) <= 0) {
+    if (compare_date_tm(cmp_field(patient_record), date2) <= 0) {
       /* Check upper bound */
       if (country != NULL) {
         if (!strcmp(country, patient_record->country)) {
@@ -46,12 +49,14 @@ int __count_patients_between(avl_node_ptr current_root, int* counter,
         (*counter)++;
       }
     }
-    __count_patients_between(temp->right_, counter, date1, date2, country);
+    __count_patients_between(temp->right_, cmp_field, counter, date1, date2, country);
   }
 }
 
 static inline
-int __num_patients_between(avl_ptr disease_avl, char* date1, char* date2, char* country) {
+int __num_patients_between(avl_ptr disease_avl,
+                           struct tm (*cmp_field)(patient_record_ptr),
+                           char* date1, char* date2, char* country) {
   int counter = 0;
   /* Convert string dates to struct tm format */
   struct tm date1_tm;
@@ -67,7 +72,7 @@ int __num_patients_between(avl_ptr disease_avl, char* date1, char* date2, char* 
     We can prune the traversal under the node in which a patient record has
     entry date < date1 or exit date > date2.
   */
-   __count_patients_between(disease_avl->root_, &counter, date1_tm, date2_tm, country);
+   __count_patients_between(disease_avl->root_, cmp_field, &counter, date1_tm, date2_tm, country);
   return counter;
 }
 
@@ -79,7 +84,7 @@ void execute_disease_frequency(char** argv) {
     /* Cast result to avl pointer */
     avl_ptr disease_avl = (avl_ptr) result;
     /* Print total number of patients for given country in the given date range */
-    printf("%d\n", __num_patients_between(disease_avl, argv[1], argv[2], NULL));
+    printf("%d\n", __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], NULL));
   }
 }
 
@@ -89,6 +94,32 @@ void execute_search_patient_record(char** argv) {
     report_warning("There is no patient record with Record ID: <%s>", argv[0]);
   } else {
     patient_record_print(result, stdout);
+  }
+}
+
+void execute_num_patients_admissions(char** argv) {
+  /* Get for the current disease its AVL tree */
+  void* result = hash_table_find(disease_ht, argv[0]);
+  if (result == NULL) {
+    report_warning("There is no disease recorded with Disease ID: <%s>", argv[0]);
+  } else {
+    /* Cast result to avl pointer */
+    avl_ptr disease_avl = (avl_ptr) result;
+    /* Print total number of patients in the given date range */
+    printf("%d\n", __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], NULL));
+  }
+}
+
+void execute_num_patients_discharges(char** argv) {
+  /* Get for the current disease its AVL tree */
+  void* result = hash_table_find(disease_ht, argv[0]);
+  if (result == NULL) {
+    report_warning("There is no disease recorded with Disease ID: <%s>", argv[0]);
+  } else {
+    /* Cast result to avl pointer */
+    avl_ptr disease_avl = (avl_ptr) result;
+    /* Print total number of patients in the given date range */
+    printf("%d\n", __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], NULL));
   }
 }
 

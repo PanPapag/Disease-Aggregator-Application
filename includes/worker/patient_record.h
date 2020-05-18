@@ -61,5 +61,10 @@
   char* get_country(patient_record_ptr);
   /* Utility function to get the disease id member of a patient record */
   char* get_disease_id(patient_record_ptr);
+  /* Utility function to get the entry date of a patient record */
+  struct tm get_entry_date(patient_record_ptr);
+  /* Utility function to get the exit date of a patient record */
+  struct tm get_exit_date(patient_record_ptr);
+
 
 #endif

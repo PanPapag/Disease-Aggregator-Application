@@ -10,6 +10,10 @@
 
     void execute_disease_frequency(char**);
 
+    void execute_num_patients_admissions(char**);
+
+    void execute_num_patients_discharges(char**);
+
     void execute_search_patient_record(char**);
 
     int execute_insert_patient_record(patient_record_ptr);
