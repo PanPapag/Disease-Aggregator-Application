@@ -60,5 +60,7 @@ int main(int argc, char* argv[]) {
   // ar[0] = "2107";
   // execute_search_patient_record(ar);
 
+  execute_exit();
+  
   return EXIT_SUCCESS;
 }

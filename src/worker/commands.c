@@ -123,6 +123,16 @@ void execute_num_patients_discharges(char** argv) {
   }
 }
 
+void execute_exit() {
+  /* Free all memory allocated by the program */
+  hash_table_clear(patient_record_ht);
+  hash_table_clear(disease_ht);
+  hash_table_clear(country_ht);
+  list_clear(diseases_names);
+  list_clear(countries_names);
+  exit(EXIT_SUCCESS);
+}
+
 int execute_insert_patient_record(patient_record_ptr patient_record) {
   void* result = hash_table_find(patient_record_ht, patient_record->record_id);
   /* If record Id not found */

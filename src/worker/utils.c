@@ -177,7 +177,7 @@ char* get_last_token(const char* str, char* del) {
   // Extract the first token
   char* token = strtok(dup_str, del);
   // loop through the string to extract all other tokens
-  while(token != NULL) {
+  while (token != NULL) {
     last_token = token;
     token = strtok(NULL, del);
   }
