@@ -64,11 +64,12 @@ void parse_file_and_update_structures(const char* file_path, const char* file_na
     const char* dir_name = "Argentina";
     if (!strcmp(status,"ENTER")) {
       patient_record_ptr patient_record = patient_record_create(file_entry_tokens, file_name, dir_name);
-      patient_record_print(patient_record, stdout);
+      if (execute_insert_patient_record(patient_record) == ERROR) {
+        printf("ERROR\n");
+      }
+    } else {
+      printf("EXIT DATE\n");
     }
-    // if (execute_insert_patient_record(patient_record_tokens) == ERROR) {
-    //   printf("ERROR\n");
-    // }
     /* Free wordexp object */
     wordfree(&p);
   }

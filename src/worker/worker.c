@@ -13,27 +13,26 @@ extern hash_table_ptr patient_record_ht;
 extern hash_table_ptr disease_ht;
 extern hash_table_ptr country_ht;
 
-#define NO_BUCKETS 20
-#define BUCKET_SIZE 64
-
 int main(int argc, char* argv[]) {
+  const size_t no_buckets = 20;
+  const size_t bucket_size = 64;
   /* patient_record_ht: record id --> pointer to patient record structure */
-  hash_table_ptr patient_record_ht = hash_table_create(
-                                      NO_BUCKETS, BUCKET_SIZE,
+  patient_record_ht = hash_table_create(
+                                      no_buckets, bucket_size,
                                       hash_string, compare_string,
                                       print_string, patient_record_print,
                                       NULL, patient_record_delete
-                                    );
+                                      );
   /* Create Disease Hash Table */
-  hash_table_ptr disease_ht = hash_table_create(
-                                NO_BUCKETS, BUCKET_SIZE,
+  disease_ht = hash_table_create(
+                                no_buckets, bucket_size,
                                 hash_string, compare_string,
                                 print_string, avl_print_inorder,
                                 NULL, avl_clear
                               );
   /* Create Country Hash Table */
-  hash_table_ptr country_ht = hash_table_create(
-                                NO_BUCKETS, BUCKET_SIZE,
+  country_ht = hash_table_create(
+                                no_buckets, bucket_size,
                                 hash_string, compare_string,
                                 print_string, avl_print_inorder,
                                 NULL, avl_clear

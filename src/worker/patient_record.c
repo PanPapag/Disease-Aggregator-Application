@@ -51,12 +51,12 @@ patient_record_ptr patient_record_create(char** file_entry_tokens,
   /* Store age */
   patient_record->age = atoi(file_entry_tokens[5]);
   /* Allocate memory and store country */
-  patient_record->country = (char*) malloc((strlen(country) * sizeof(char)));
+  patient_record->country = (char*) malloc((strlen(country) + 1) * sizeof(char));
   if (patient_record->country == NULL) {
     report_error("Could not allocate memory for Patient Record Country. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->country, country);
+  strcpy(patient_record->country, country); //TODO HERE
   /* Store entry_date using struct tm format */
   memset(&patient_record->entry_date, 0, sizeof(struct tm));
   strptime(entry_date, "%d-%m-%Y", &patient_record->entry_date);
@@ -88,8 +88,8 @@ void patient_record_print(void* v, FILE* out) {
 }
 
 int64_t patient_record_compare(void* a, void* b) {
-	patient_record_ptr pr1 = *((patient_record_ptr *) a);
-	patient_record_ptr pr2 = *((patient_record_ptr *) b);
+	patient_record_ptr pr1 = (patient_record_ptr) a;
+	patient_record_ptr pr2 = (patient_record_ptr) b;
   char pr1_entry_date_buffer[MAX_BUFFER_SIZE];
   char pr2_entry_date_buffer[MAX_BUFFER_SIZE];
   strftime(pr1_entry_date_buffer, sizeof(pr1_entry_date_buffer), "%s", &pr1->entry_date);
@@ -102,7 +102,7 @@ int64_t patient_record_compare(void* a, void* b) {
 }
 
 void patient_record_delete(void* v) {
-  patient_record_ptr patient_record = *((patient_record_ptr *) v);
+  patient_record_ptr patient_record = (patient_record_ptr) v;
   if (patient_record != NULL) {
     __FREE(patient_record->record_id);
     __FREE(patient_record->disease_id);
