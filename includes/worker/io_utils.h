@@ -17,9 +17,9 @@
     and calls parse_file_and_update_structures
     @param dir_pathname: The relative path to directory
   */
-  void parse_directory(const char* dir_name);
+  void parse_directory(const char* dir_path);
 
-  void parse_file_and_update_structures(const char* file_path, const char* date);
+  void parse_file_and_update_structures(const char* dir_name, const char* file_path, const char* date);
 
   /* Reports Error Messages */
   void report_error(const char *fmt, ...);

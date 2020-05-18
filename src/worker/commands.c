@@ -68,7 +68,7 @@ int execute_insert_patient_record(patient_record_ptr patient_record) {
   return PASS;
 }
 
-int execute_record_patient_exit(char* id, char* exit_date) {
+int execute_record_patient_exit(char* id, const char* exit_date) {
   /* Search if patient record id exists */
   void* result = hash_table_find(patient_record_ht, id);
   if (result == NULL) {

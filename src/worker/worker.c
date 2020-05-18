@@ -36,16 +36,14 @@ int main(int argc, char* argv[]) {
                                  NULL, avl_clear);
 
   /* Initialize a list to store all disease names */
-	diseases_names = list_create(STRING*, print_string, compare_string, NULL);
+	diseases_names = list_create(STRING*, compare_string, print_string, NULL);
   /* Initialize a list to store all disease names */
-	countries_names = list_create(STRING*, print_string, compare_string, NULL);
+	countries_names = list_create(STRING*, compare_string, print_string, NULL);
 
   // testing
   char* dir_name = "../input_dir/Argentina";
   parse_directory(dir_name);
 
-  // hash_table_print(patient_record_ht, stdout);
-  list_print(diseases_names, stdout);
-  list_print(countries_names, stdout);
+
   return EXIT_SUCCESS;
 }

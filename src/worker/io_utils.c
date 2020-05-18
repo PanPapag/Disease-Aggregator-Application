@@ -21,6 +21,7 @@ void parse_directory(const char* dir_path) {
     report_error("Cannot open %s\n", dir_path);
   }
   else {
+    const char* dir_name = get_last_token(dir_path, "/");
     while ((direntp = readdir(dir_ptr)) != NULL) {
       // Skip previous and current folder
       if (strcmp(direntp->d_name, ".") && strcmp(direntp->d_name, "..")) {
@@ -35,7 +36,7 @@ void parse_directory(const char* dir_path) {
         snprintf(file_path, file_path_size, "%s/%s", dir_path, direntp->d_name);
         // The parsing of the file and the update of the structures is executed
         // by the function below
-        parse_file_and_update_structures(file_path, direntp->d_name);
+        parse_file_and_update_structures(dir_name, file_path, direntp->d_name);
         // Deallocate memory for the next one
         __FREE(file_path);
       }
@@ -44,7 +45,9 @@ void parse_directory(const char* dir_path) {
   }
 }
 
-void parse_file_and_update_structures(const char* file_path, const char* file_name) {
+void parse_file_and_update_structures(const char* dir_name,
+                                      const char* file_path,
+                                      const char* file_name) {
   char buffer[MAX_BUFFER_SIZE];
   char* patient_record_tokens[NO_PATIENT_RECORD_TOKENS];
   char** file_entry_tokens;
@@ -60,7 +63,6 @@ void parse_file_and_update_structures(const char* file_path, const char* file_na
     file_entry_tokens = p.we_wordv;
     file_entry_no_tokens = p.we_wordc;
     char* status = file_entry_tokens[1];
-    const char* dir_name = "Argentina"; // TODO FIX IT
     if (!strcmp(status,"ENTER")) {
       patient_record_ptr patient_record = patient_record_create(file_entry_tokens, file_name, dir_name);
       if (execute_insert_patient_record(patient_record) == ERROR) {

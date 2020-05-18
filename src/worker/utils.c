@@ -53,7 +53,7 @@ size_t hash_string(void* value) {
 }
 
 void print_string(void* v, FILE* out) {
-  fprintf(out, "%s\n", (char*) v);
+  fprintf(out, "%s\n", *((char**) v));
 }
 
 int compare_string(void* v, void* w) {
@@ -169,4 +169,17 @@ char** prune_command_name(char** src, size_t size) {
     *(dest + i - 1) = src[i];
   }
   return dest;
+}
+
+char* get_last_token(const char* str, char* del) {
+  char* last_token = NULL;
+  char* dup_str = strdup(str);
+  // Extract the first token
+  char* token = strtok(dup_str, del);
+  // loop through the string to extract all other tokens
+  while(token != NULL) {
+    last_token = token;
+    token = strtok(NULL, del);
+  }
+  return last_token;
 }

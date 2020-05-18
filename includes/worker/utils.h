@@ -56,4 +56,7 @@
   /* Given an array of strings it returns the same array without the first string */
   char** prune_command_name(char**, size_t);
 
+  /* Returns the last token given a string and a delimiter */
+  char* get_last_token(const char*, char*);
+
 #endif
