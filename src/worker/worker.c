@@ -40,5 +40,8 @@ int main(int argc, char* argv[]) {
   // testing
   char* dir_name = "../input_dir/Argentina";
   parse_directory(dir_name);
+
+  // hash_table_print(patient_record_ht, stdout);
+
   return EXIT_SUCCESS;
 }

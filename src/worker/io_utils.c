@@ -50,7 +50,6 @@ void parse_file_and_update_structures(const char* file_path, const char* file_na
   char** file_entry_tokens;
   int file_entry_no_tokens;
   wordexp_t p;
-  printf("%s %s\n",file_path, file_name);
   /* Open file for read only - handles binary fille too */
   FILE* fp = fopen(file_path, "rb+");
   /* Read file line by line */
@@ -61,14 +60,16 @@ void parse_file_and_update_structures(const char* file_path, const char* file_na
     file_entry_tokens = p.we_wordv;
     file_entry_no_tokens = p.we_wordc;
     char* status = file_entry_tokens[1];
-    const char* dir_name = "Argentina";
+    const char* dir_name = "Argentina"; // TODO FIX IT
     if (!strcmp(status,"ENTER")) {
       patient_record_ptr patient_record = patient_record_create(file_entry_tokens, file_name, dir_name);
       if (execute_insert_patient_record(patient_record) == ERROR) {
         printf("ERROR\n");
       }
     } else {
-      printf("EXIT DATE\n");
+      if (execute_record_patient_exit(file_entry_tokens[0], file_name) == ERROR) {
+        printf("ERROR\n");
+      }
     }
     /* Free wordexp object */
     wordfree(&p);

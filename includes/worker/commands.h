@@ -10,6 +10,6 @@
 
     int execute_insert_patient_record(patient_record_ptr);
 
-    void execute_record_patient_exit(char**);
+    int execute_record_patient_exit(char*, char*);
 
 #endif

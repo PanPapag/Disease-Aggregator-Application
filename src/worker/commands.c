@@ -64,3 +64,38 @@ int execute_insert_patient_record(patient_record_ptr patient_record) {
   }
   return PASS;
 }
+
+int execute_record_patient_exit(char* id, char* exit_date) {
+  /* Search if patient record id exists */
+  void* result = hash_table_find(patient_record_ht, id);
+  if (result == NULL) {
+    report_warning("Patient record with Record ID: <%s> not found.", id);
+    return ERROR;
+  } else {
+    // Cast result to patient record pointer
+    patient_record_ptr patient_record = (patient_record_ptr) result;
+    /* Convert exit_date struct tm to buffer */
+    char exit_date_buffer[MAX_BUFFER_SIZE];
+    strftime(exit_date_buffer, sizeof(exit_date_buffer), "%d-%m-%Y", &patient_record->exit_date);
+    /* Convert entry_date struct tm to buffer */
+    char entry_date_buffer[MAX_BUFFER_SIZE];
+    strftime(entry_date_buffer, sizeof(entry_date_buffer), "%d-%m-%Y", &patient_record->entry_date);
+    /* exit_date has to be greater than entry_date */
+    if (compare_date_strings(entry_date_buffer, exit_date) > 0) {
+      report_warning("Entry Date [%s] is after the given Exit Date [%s].",
+                      entry_date_buffer, exit_date);
+      return ERROR;
+    }
+    /* Check if exit date is not specified */
+    if (!strcmp(exit_date_buffer, EXIT_DATE_NOT_SPECIFIED)) {
+      // Update exit day of patient record with the given record id
+      memset(&patient_record->exit_date, 0, sizeof(struct tm));
+      strptime(exit_date, "%d-%m-%Y", &patient_record->exit_date);
+    } else {
+      report_warning("Patient record Exit Date with Record ID: "
+                     "<%s> is already specified.", id);
+      return ERROR;
+    }
+  }
+  return PASS;
+}
