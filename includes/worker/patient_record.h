@@ -1,8 +1,10 @@
 #ifndef __WORKER_PATIENT_RECORD__
   #define __WORKER_PATIENT_RECORD__
 
-  #include <stdint.h>
+  #define _XOPEN_SOURCE
   #include <time.h>
+
+  #include <stdint.h>
 
   #define NO_PATIENT_RECORD_TOKENS 8
   #define PATIENT_RECORD_DELIMITER " "
@@ -34,11 +36,12 @@
 
   typedef patient_record_t* patient_record_ptr;
 
+
   /*
     Utility function to create a new patient record struct given
-    patient record tokens
+    parsed file tokens, file name and parent dir name
   */
-  patient_record_ptr patient_record_create(char**);
+  patient_record_ptr patient_record_create(char**, const char*, const char*);
   /* Utility function to print a patient record struct */
   void patient_record_print(void*, FILE*);
   /* Utility function to compare two patient record structs */

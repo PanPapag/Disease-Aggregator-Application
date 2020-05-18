@@ -4,7 +4,7 @@ ODIR := .obj
 BDIR := build
 
 CC := gcc
-CLFAGS := -Wall -g3
+CFLAGS := -w -g3
 CFLAGS += -I$(IDIR) -MMD
 
 _SRC := $(shell find $(SDIR) -maxdepth 2 -type f -regex ".*\.c")

@@ -1,6 +1,11 @@
 #ifndef __WORKER_IO_UTILS__
   #define __WORKER_IO_UTILS__
 
+  enum handle_command_codes {
+   PASS,
+   ERROR
+ };
+
   /**
     Uncomment the line below if you with the enable extensively checking on
     th records' format

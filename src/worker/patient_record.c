@@ -5,14 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "../../includes/common/macros.h"
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/utils.h"
 
-patient_record_ptr patient_record_create(char** patient_record_tokens) {
+patient_record_ptr patient_record_create(char** file_entry_tokens,
+                                         const char* entry_date,
+                                         const char* country) {
   /* Allocate memory for patient_record_ptr */
   patient_record_ptr patient_record = malloc(sizeof(*patient_record));
   if (patient_record == NULL) {
@@ -20,53 +21,54 @@ patient_record_ptr patient_record_create(char** patient_record_tokens) {
     exit(EXIT_FAILURE);
   }
   /* Allocate memory and store record_id */
-  patient_record->record_id = (char*) malloc((strlen(patient_record_tokens[0]) + 1) * sizeof(char));
+  patient_record->record_id = (char*) malloc((strlen(file_entry_tokens[0]) + 1) * sizeof(char));
   if (patient_record->record_id == NULL) {
     report_error("Could not allocate memory for Patient Record Record ID. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->record_id, patient_record_tokens[0]);
+  strcpy(patient_record->record_id, file_entry_tokens[0]);
   /* Allocate memory and store patient_first_name */
-  patient_record->patient_first_name = (char*) malloc((strlen(patient_record_tokens[1]) + 1) * sizeof(char));
+  patient_record->patient_first_name = (char*) malloc((strlen(file_entry_tokens[2]) + 1) * sizeof(char));
   if (patient_record->patient_first_name == NULL) {
     report_error("Could not allocate memory for Patient Record First Name. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->patient_first_name, patient_record_tokens[1]);
+  strcpy(patient_record->patient_first_name, file_entry_tokens[2]);
   /* Allocate memory and store patient_last_name */
-  patient_record->patient_last_name = (char*) malloc((strlen(patient_record_tokens[2]) + 1) * sizeof(char));
+  patient_record->patient_last_name = (char*) malloc((strlen(file_entry_tokens[3]) + 1) * sizeof(char));
   if (patient_record->patient_last_name == NULL) {
     report_error("Could not allocate memory for Patient Record Last Name. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->patient_last_name, patient_record_tokens[2]);
+  strcpy(patient_record->patient_last_name, file_entry_tokens[3]);
   /* Allocate memory and store disease_id */
-  patient_record->disease_id = (char*) malloc((strlen(patient_record_tokens[3]) + 1) * sizeof(char));
+  patient_record->disease_id = (char*) malloc((strlen(file_entry_tokens[4]) + 1) * sizeof(char));
   if (patient_record->disease_id == NULL) {
     report_error("Could not allocate memory for Patient Record Disease ID. Exiting...");
     exit(EXIT_FAILURE);
   }
+  strcpy(patient_record->disease_id, file_entry_tokens[4]);
   /* Store age */
-  patient_record->age = atoi(patient_record_tokens[4]);
+  patient_record->age = atoi(file_entry_tokens[5]);
   /* Allocate memory and store country */
-  patient_record->country = (char*) malloc((strlen(patient_record_tokens[5]) + 1) * sizeof(char));
+  patient_record->country = (char*) malloc((strlen(country) * sizeof(char)));
   if (patient_record->country == NULL) {
     report_error("Could not allocate memory for Patient Record Country. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->country, patient_record_tokens[5]);
+  strcpy(patient_record->country, country);
   /* Store entry_date using struct tm format */
   memset(&patient_record->entry_date, 0, sizeof(struct tm));
-  strptime(patient_record_tokens[6], "%d-%m-%Y", &patient_record->entry_date);
+  strptime(entry_date, "%d-%m-%Y", &patient_record->entry_date);
   /* Store exit_date using struct tm format */
   memset(&patient_record->exit_date, 0, sizeof(struct tm));
-  strptime(patient_record_tokens[7], "%d-%m-%Y", &patient_record->exit_date);
+  strptime(EXIT_DATE_NOT_SPECIFIED, "%d-%m-%Y", &patient_record->exit_date);
   /* Return patient record pointer */
   return patient_record;
 }
 
 void patient_record_print(void* v, FILE* out) {
-  patient_record_ptr patient_record = *((patient_record_ptr *) v);
+  patient_record_ptr patient_record = (patient_record_ptr) v;
   char entry_date_buffer[MAX_BUFFER_SIZE];
   char exit_date_buffer[MAX_BUFFER_SIZE];
   fprintf(out, "Record ID: %s\n", patient_record->record_id);

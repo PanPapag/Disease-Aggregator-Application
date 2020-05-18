@@ -2,6 +2,8 @@
   #define __UTILS__
 
   #include <stdint.h>
+
+  #define _XOPEN_SOURCE  
   #include <time.h>
 
   typedef struct program_parameters {

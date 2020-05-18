@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "../../includes/common/macros.h"
 #include "../../includes/worker/io_utils.h"

@@ -19,6 +19,8 @@ hash_table_ptr country_ht;
 
 int execute_insert_patient_record(char** argv) {
   char* status = argv[1];
-  printf("STATUS: %s\n", status);
-  return 1;
+  if (!strcmp(status, "ENTER")) {
+    printf("good\n");
+  }
+  return PASS;
 }
