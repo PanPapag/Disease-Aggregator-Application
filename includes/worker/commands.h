@@ -8,6 +8,8 @@
       VALID_COMMAND
     };
 
+    void execute_disease_frequency(char**);
+
     int execute_insert_patient_record(patient_record_ptr);
 
     int execute_record_patient_exit(char*, const char*);

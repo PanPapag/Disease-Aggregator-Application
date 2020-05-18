@@ -4,6 +4,7 @@
 
 #include "../../includes/common/macros.h"
 #include "../../includes/worker/avl.h"
+#include "../../includes/worker/commands.h"
 #include "../../includes/worker/hash_table.h"
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
@@ -43,7 +44,13 @@ int main(int argc, char* argv[]) {
   // testing
   char* dir_name = "../input_dir/Argentina";
   parse_directory(dir_name);
-
+  
+  // DiseaseFrequency command
+  // char *ar[3];
+  // ar[0] = "SARS-1";
+  // ar[1] = "01-01-2020";
+  // ar[2] = "04-01-2020";
+  // execute_disease_frequency(ar);
 
   return EXIT_SUCCESS;
 }
