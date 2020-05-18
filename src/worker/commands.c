@@ -83,6 +83,15 @@ void execute_disease_frequency(char** argv) {
   }
 }
 
+void execute_search_patient_record(char** argv) {
+  void* result = hash_table_find(patient_record_ht, argv[0]);
+  if (result == NULL) {
+    report_warning("There is no patient record with Record ID: <%s>", argv[0]);
+  } else {
+    patient_record_print(result, stdout);
+  }
+}
+
 int execute_insert_patient_record(patient_record_ptr patient_record) {
   void* result = hash_table_find(patient_record_ht, patient_record->record_id);
   /* If record Id not found */

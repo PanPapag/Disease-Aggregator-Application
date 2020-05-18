@@ -44,13 +44,17 @@ int main(int argc, char* argv[]) {
   // testing
   char* dir_name = "../input_dir/Argentina";
   parse_directory(dir_name);
-  
+
   // DiseaseFrequency command
   // char *ar[3];
   // ar[0] = "SARS-1";
   // ar[1] = "01-01-2020";
   // ar[2] = "04-01-2020";
   // execute_disease_frequency(ar);
+
+  // char* ar[1];
+  // ar[0] = "2107";
+  // execute_search_patient_record(ar);
 
   return EXIT_SUCCESS;
 }
