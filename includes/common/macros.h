@@ -13,4 +13,6 @@
 
   #define MAX_BUFFER_SIZE 1024
 
+  #define STRING char*
+
 #endif

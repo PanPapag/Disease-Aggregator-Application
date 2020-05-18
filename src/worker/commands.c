@@ -17,6 +17,9 @@ hash_table_ptr patient_record_ht;
 hash_table_ptr disease_ht;
 hash_table_ptr country_ht;
 
+list_ptr diseases_names;
+list_ptr countries_names;
+
 int execute_insert_patient_record(patient_record_ptr patient_record) {
   void* result = hash_table_find(patient_record_ht, patient_record->record_id);
   /* If record Id not found */
@@ -27,7 +30,7 @@ int execute_insert_patient_record(patient_record_ptr patient_record) {
     result = hash_table_find(disease_ht, patient_record->disease_id);
     if (result == NULL) {
       /* Store disease to global diseases_names list */
-      // list_push_front(&diseases_names, &patient_record->disease_id);
+      list_push_front(&diseases_names, &patient_record->disease_id);
       /* If not found create a new AVL tree to store pointers to patient record */
       avl_ptr new_disease_avl = avl_create(patient_record_compare,
                                            patient_record_print);
@@ -43,7 +46,7 @@ int execute_insert_patient_record(patient_record_ptr patient_record) {
     result = hash_table_find(country_ht, patient_record->country);
     if (result == NULL) {
       /* Store country to global countries_names list */
-      // list_push_front(&countries_names, &patient_record->country);
+      list_push_front(&countries_names, &patient_record->country);
       /* If not found create a new AVL tree to store pointers to patient record */
       avl_ptr new_country_avl = avl_create(patient_record_compare,
                                            patient_record_print);
