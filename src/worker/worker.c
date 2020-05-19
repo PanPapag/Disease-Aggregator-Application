@@ -61,6 +61,6 @@ int main(int argc, char* argv[]) {
   // execute_search_patient_record(ar);
 
   execute_exit();
-  
+
   return EXIT_SUCCESS;
 }

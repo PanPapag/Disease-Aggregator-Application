@@ -172,14 +172,6 @@ char** prune_command_name(char** src, size_t size) {
 }
 
 char* get_last_token(const char* str, char* del) {
-  char* last_token = NULL;
-  char* dup_str = strdup(str);
-  // Extract the first token
-  char* token = strtok(dup_str, del);
-  // loop through the string to extract all other tokens
-  while (token != NULL) {
-    last_token = token;
-    token = strtok(NULL, del);
-  }
-  return last_token;
+  char* last_token = strrchr(str, '/');
+  return last_token+1;
 }

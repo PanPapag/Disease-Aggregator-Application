@@ -56,7 +56,7 @@ patient_record_ptr patient_record_create(char** file_entry_tokens,
     report_error("Could not allocate memory for Patient Record Country. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(patient_record->country, country); //TODO HERE
+  strcpy(patient_record->country, country);
   /* Store entry_date using struct tm format */
   memset(&patient_record->entry_date, 0, sizeof(struct tm));
   strptime(entry_date, "%d-%m-%Y", &patient_record->entry_date);

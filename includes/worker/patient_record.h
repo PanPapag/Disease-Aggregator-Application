@@ -10,6 +10,13 @@
   #define PATIENT_RECORD_DELIMITER " "
   #define EXIT_DATE_NOT_SPECIFIED "00-01-1900"
 
+  enum age_groups {
+    GROUP_1,
+    GROUP_2,
+    GROUP_3,
+    GROUP_4
+  };
+
   enum patient_record_error_codes {
     VALID_PATIENT_RECORD,
     INVALID_RECORD_ID,
