@@ -42,9 +42,14 @@ int main(int argc, char* argv[]) {
   /* Initialize a list to store all disease names */
 	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
 
+  /* Extract arguments */
+  printf("%s %s\n",argv[1], argv[2]);
+  unlink(argv[1]);
+  unlink(argv[2]);
+
   // testing
-  char* dir_name = "../input_dir/Argentina";
-  parse_directory(dir_name);
+  // char* dir_name = "../input_dir/Argentina";
+  // parse_directory(dir_name);
 
   // DiseaseFrequency - NumPatients commands
   // char *ar[3];
