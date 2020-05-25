@@ -3,12 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/heap.h"
 #include "../../includes/worker/io_utils.h"
-#include "../../includes/worker/list.h"
 
 heap_ptr heap_create(int (*heap_cmp_func)(void*, void*),
                      void (*heap_print_func)(void*, FILE*),

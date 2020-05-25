@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
@@ -12,9 +13,7 @@
 #include "../../includes/worker/hash_table.h"
 #include "../../includes/worker/heap.h"
 #include "../../includes/worker/io_utils.h"
-#include "../../includes/worker/list.h"
 #include "../../includes/worker/patient_record.h"
-#include "../../includes/worker/utils.h"
 
 hash_table_ptr patient_record_ht;
 hash_table_ptr disease_ht;

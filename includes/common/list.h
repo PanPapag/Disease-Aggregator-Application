@@ -1,5 +1,5 @@
-#ifndef __WORKER_LIST__
-  #define __WORKER_LIST__
+#ifndef __COMMON_LIST__
+  #define __COMMON_LIST__
 
   #include <stdint.h>
 

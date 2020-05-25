@@ -10,10 +10,10 @@
 
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
+#include "../../includes/common/utils.h"
 #include "../../includes/worker/commands.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
-#include "../../includes/worker/utils.h"
 
 void parse_directory(const char* dir_path) {
   struct dirent* direntp;

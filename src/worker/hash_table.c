@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"

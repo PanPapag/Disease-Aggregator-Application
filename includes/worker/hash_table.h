@@ -2,7 +2,7 @@
   #define __WORKER_HASH_TABLE__
 
   #include <stdint.h>
-  #include "list.h"
+  #include "../common/list.h"
 
   enum ht_insert_codes {
     FAIL,

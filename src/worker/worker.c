@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
+#include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/commands.h"
 #include "../../includes/worker/hash_table.h"
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
-#include "../../includes/worker/utils.h"
 
 extern hash_table_ptr patient_record_ht;
 extern hash_table_ptr disease_ht;

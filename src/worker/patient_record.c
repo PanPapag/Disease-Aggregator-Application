@@ -11,7 +11,6 @@
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
-#include "../../includes/worker/utils.h"
 
 patient_record_ptr patient_record_create(char** file_entry_tokens,
                                          const char* entry_date,
