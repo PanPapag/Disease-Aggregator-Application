@@ -25,14 +25,18 @@
 
   /* Hash Function for strings */
   size_t hash_string(void*);
-  /* Prints the value of a given string pointer */
-  void print_string_ptr(void*, FILE* out);
   /* Prints the given string */
   void print_string(void*, FILE* out);
   /* Compares two given strings */
   int compare_string(void*, void*);
   /* Free a pointer to char */
   void destroy_string(void*);
+  /* Prints the value of a given string pointer */
+  void print_string_ptr(void*, FILE* out);
+  /* Compares two given string pointers */
+  int compare_string_ptr(void*, void*);
+  /* Free a pointer to char* */
+  void destroy_string_ptr(void*);
 
   /* Checks if a string contains only letters and number */
   int is_alpharithmetic(char*);

@@ -80,12 +80,12 @@ size_t hash_string(void* value) {
   return hash;
 }
 
-void print_string_ptr(void* v, FILE* out) {
-  fprintf(out, "%s\n", *((char**) v));
-}
-
 void print_string(void* v, FILE* out) {
   fprintf(out, "%s\n", (char*) v);
+}
+
+void print_string_ptr(void* v, FILE* out) {
+  fprintf(out, "%s\n", *((char**) v));
 }
 
 int compare_string(void* v, void* w) {
@@ -95,6 +95,19 @@ int compare_string(void* v, void* w) {
 }
 
 void destroy_string(void *v) {
+  if (v != NULL) {
+    char* s = (char*) v;
+    __FREE(s);
+  }
+}
+
+int compare_string_ptr(void* v, void* w) {
+  char* str1 = (*(char**) v);
+  char* str2 = (*(char**) w);
+  return strcmp(str1, str2);
+}
+
+void destroy_string_ptr(void *v) {
   if (v != NULL) {
     char* s = (*(char**)v);
     __FREE(s);

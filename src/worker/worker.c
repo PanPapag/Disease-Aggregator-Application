@@ -38,9 +38,9 @@ int main(int argc, char* argv[]) {
                                  NULL, avl_clear);
 
   /* Initialize a list to store all disease names */
-	diseases_names = list_create(STRING*, compare_string, print_string_ptr, NULL);
+	diseases_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
   /* Initialize a list to store all disease names */
-	countries_names = list_create(STRING*, compare_string, print_string_ptr, NULL);
+	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
 
   // testing
   char* dir_name = "../input_dir/Argentina";
