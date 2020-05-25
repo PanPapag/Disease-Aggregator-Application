@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
   // ar[1] = "01-01-2020";
   // ar[2] = "04-01-2020";
   // execute_disease_frequency(ar);
-  //
+
   // execute_num_patients_admissions(ar);
   //
   // execute_num_patients_discharges(ar);
@@ -59,6 +59,8 @@ int main(int argc, char* argv[]) {
   // char* ar[1];
   // ar[0] = "2107";
   // execute_search_patient_record(ar);
+
+  hash_table_print(patient_record_ht, stdout);
 
   execute_exit();
 

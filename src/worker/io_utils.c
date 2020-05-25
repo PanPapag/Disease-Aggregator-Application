@@ -67,11 +67,11 @@ void parse_file_and_update_structures(const char* dir_name,
     if (!strcmp(status,"ENTER")) {
       patient_record_ptr patient_record = patient_record_create(file_entry_tokens, file_name, dir_name);
       if (execute_insert_patient_record(patient_record) == ERROR) {
-        printf("ERROR\n");
+        printf("ERROR 1\n");
       }
     } else {
       if (execute_record_patient_exit(file_entry_tokens[0], file_name) == ERROR) {
-        printf("ERROR\n");
+        printf("ERROR 2\n");
       }
     }
     /* Free wordexp object */

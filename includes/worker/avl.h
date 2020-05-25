@@ -19,12 +19,12 @@
   struct avl_t {
     avl_node_ptr root_;
     size_t size_;
-    int (*avl_cmp_func_)(void*, void*);
+    int64_t (*avl_cmp_func_)(void*, void*);
     void (*avl_print_func_)(void*, FILE*);
   } avl_t;
 
   /* Creates a new avl tree given compare, print and delete functions */
-  avl_ptr avl_create(int (*)(void*, void*), void (*)(void*, FILE*));
+  avl_ptr avl_create(int64_t (*)(void*, void*), void (*)(void*, FILE*));
 
   /* Generic Purpose Delete Function of AVL Tree */
   void avl_clear(void*);

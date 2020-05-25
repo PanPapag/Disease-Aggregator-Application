@@ -119,7 +119,7 @@ int is_unspecified_date_tm(struct tm date) {
   return !strcmp(date_buf, "00-01-1900");
 }
 
-int64_t compare_date_strings(char* date1, char* date2) {
+int64_t compare_date_strings(char* date1, const char* date2) {
   // Convert date1 string to struct tm
   struct tm date1_tm;
   memset(&date1_tm, 0, sizeof(struct tm));

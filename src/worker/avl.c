@@ -9,7 +9,7 @@
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/io_utils.h"
 
-avl_ptr avl_create(int (*avl_cmp_func)(void*, void*),
+avl_ptr avl_create(int64_t (*avl_cmp_func)(void*, void*),
                    void (*avl_print_func)(void*, FILE*)) {
 
   avl_ptr avl = malloc(sizeof(*avl));

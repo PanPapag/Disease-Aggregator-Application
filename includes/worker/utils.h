@@ -46,7 +46,7 @@
     - > 0 if date1 is after of date2
     - < 0 if date1 is previous of date2
   */
-  int64_t compare_date_strings(char*, char*);
+  int64_t compare_date_strings(char*, const char*);
   /* Compares two given dates in struct tm format */
   int64_t compare_date_tm(struct tm, struct tm);
 
