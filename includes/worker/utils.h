@@ -6,9 +6,6 @@
   #define _XOPEN_SOURCE
   #include <time.h>
 
-  /* Converts a given string to 64 bits integer */
-  uint8_t string_to_int64(char*, int64_t*);
-
   /* Hash Function for unsigned integers */
   size_t hash_uint(void*);
   /* Returns an integer in a new memory address with the given value */

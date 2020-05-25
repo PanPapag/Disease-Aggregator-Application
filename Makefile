@@ -4,13 +4,13 @@ ODIR := .obj
 BDIR := build
 
 CC := gcc
-CFLAGS := -w -g3
+CFLAGS := -g3
 CFLAGS += -I$(IDIR) -MMD
 
 _SRC := $(shell find $(SDIR) -maxdepth 2 -type f -regex ".*\.c")
 ALL_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(_SRC))
 
-MAINS := $(ODIR)/main.o $(ODIR)/worker/worker.o
+MAINS := $(ODIR)/aggregator/aggregator.o $(ODIR)/worker/worker.o
 
 OBJ := $(filter-out $(MAINS), $(ALL_OBJ))
 
@@ -19,6 +19,8 @@ DEPS := $(patsubst $(SDIR)/%.c, $(ODIR)/%.d, $(_SRC))
 $(ODIR):
 	@mkdir $(BDIR)
 	@mkdir $(ODIR)
+	@mkdir $(ODIR)/aggregator
+	@mkdir $(ODIR)/common
 	@mkdir $(ODIR)/worker
 
 $(ODIR)/%.o: $(SDIR)/%.c
@@ -27,7 +29,7 @@ $(ODIR)/%.o: $(SDIR)/%.c
 all: $(BDIR)/diseaseAggregator $(BDIR)/worker
 
 $(BDIR)/diseaseAggregator: $(ODIR) $(ALL_OBJ)
-	$(CC) $(OBJ) $(ODIR)/main.o -o $@
+	$(CC) $(OBJ) $(ODIR)/aggregator/aggregator.o -o $@
 
 $(BDIR)/worker: $(ODIR) $(ALL_OBJ)
 	$(CC) $(OBJ) $(ODIR)/worker/worker.o -o $@

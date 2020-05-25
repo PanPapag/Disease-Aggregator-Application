@@ -22,9 +22,9 @@ int main(int argc, char* argv[]) {
   const size_t bucket_size = 64;
   /* patient_record_ht: record id --> pointer to patient record structure */
   patient_record_ht = hash_table_create(no_buckets, bucket_size,
-                                       hash_string, compare_string,
-                                       print_string, patient_record_print,
-                                       NULL, patient_record_delete);
+                                        hash_string, compare_string,
+                                        print_string, patient_record_print,
+                                        NULL, patient_record_delete);
   /* Create Disease Hash Table */
   disease_ht = hash_table_create(no_buckets, bucket_size,
                                  hash_string, compare_string,

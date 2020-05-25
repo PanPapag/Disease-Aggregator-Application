@@ -21,8 +21,4 @@
 
   void parse_file_and_update_structures(const char* dir_name, const char* file_path, const char* date);
 
-  /* Reports Error Messages */
-  void report_error(const char *fmt, ...);
-  /* Reports Warning Messages */
-  void report_warning(const char *fmt, ...);
 #endif

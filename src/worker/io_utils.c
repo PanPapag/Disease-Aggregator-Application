@@ -9,6 +9,7 @@
 #include <sys/types.h>
 
 #include "../../includes/common/macros.h"
+#include "../../includes/common/io_utils.h"
 #include "../../includes/worker/commands.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
@@ -78,23 +79,4 @@ void parse_file_and_update_structures(const char* dir_name,
   }
   /* Close file pointer */
   fclose(fp);
-}
-
-static void __report(const char* tag, const char* fmt, va_list args) {
-  fprintf(stderr, "%s", tag);
-  vfprintf(stderr, fmt, args);
-  fputc('\n', stderr);
-  va_end(args);
-}
-
-void report_error(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  __report("[ERROR]: ", fmt, args);
-}
-
-void report_warning(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  __report("[WARNING]: ", fmt, args);
 }
