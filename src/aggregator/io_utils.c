@@ -32,11 +32,11 @@ void __usage() {
 }
 
 void parse_arguments(int* argc, char* argv[]) {
-  if (argc < 7) __usage();
+  if (*argc < 7) __usage();
   int c;
   while (1) {
     int option_index;
-    c = getopt_long_only(argc, argv, "w:b:i:h", options, &option_index);
+    c = getopt_long_only(*argc, argv, "w:b:i:h", options, &option_index);
     if (c == -1) break;
     switch (c) {
       case 'w': {

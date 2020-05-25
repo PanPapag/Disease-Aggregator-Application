@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../includes/common/macros.h"
+#include "../../includes/common/io_utils.h"
+#include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/io_utils.h"
-#include "../../includes/common/macros.h"
 
 avl_ptr avl_create(int (*avl_cmp_func)(void*, void*),
                    void (*avl_print_func)(void*, FILE*)) {

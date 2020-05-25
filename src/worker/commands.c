@@ -5,6 +5,8 @@
 #include <time.h>
 
 #include "../../includes/common/macros.h"
+#include "../../includes/common/io_utils.h"
+#include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/commands.h"
 #include "../../includes/worker/hash_table.h"
@@ -22,7 +24,7 @@ list_ptr diseases_names;
 list_ptr countries_names;
 
 static inline
-int __count_patients_between(avl_node_ptr current_root,
+void __count_patients_between(avl_node_ptr current_root,
                              struct tm (*cmp_field)(patient_record_ptr),
                              int* counter, struct tm date1, struct tm date2,
                              char* country) {

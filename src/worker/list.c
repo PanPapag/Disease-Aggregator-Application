@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../includes/common/macros.h"
+#include "../../includes/common/io_utils.h"
+#include "../../includes/common/utils.h"
 #include "../../includes/worker/list.h"
 #include "../../includes/worker/io_utils.h"
-#include "../../includes/common/macros.h"
 
 list_ptr __list_create(size_t data_size,
                        int (*list_cmp_func)(void*, void*),

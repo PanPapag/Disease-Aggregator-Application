@@ -7,6 +7,8 @@
 #include <string.h>
 
 #include "../../includes/common/macros.h"
+#include "../../includes/common/io_utils.h"
+#include "../../includes/common/utils.h"
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/utils.h"
