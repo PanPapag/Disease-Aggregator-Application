@@ -37,9 +37,9 @@ int main(int argc, char* argv[]) {
                                  NULL, avl_clear);
 
   /* Initialize a list to store all disease names */
-	diseases_names = list_create(STRING*, compare_string, print_string, NULL);
+	diseases_names = list_create(STRING*, compare_string, print_string_ptr, NULL);
   /* Initialize a list to store all disease names */
-	countries_names = list_create(STRING*, compare_string, print_string, NULL);
+	countries_names = list_create(STRING*, compare_string, print_string_ptr, NULL);
 
   // testing
   char* dir_name = "../input_dir/Argentina";
@@ -60,7 +60,10 @@ int main(int argc, char* argv[]) {
   // ar[0] = "2107";
   // execute_search_patient_record(ar);
 
-  hash_table_print(patient_record_ht, stdout);
+  // hash_table_print(patient_record_ht, stdout);
+  // hash_table_print(disease_ht, stdout);
+  // list_print(diseases_names, stdout);
+  // list_print(countries_names, stdout);
 
   execute_exit();
 

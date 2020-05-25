@@ -19,7 +19,9 @@
 
   /* Hash Function for strings */
   size_t hash_string(void*);
-  /* Prints a given string */
+  /* Prints the value of a given string pointer */
+  void print_string_ptr(void*, FILE* out);
+  /* Prints the given string */
   void print_string(void*, FILE* out);
   /* Compares two given strings */
   int compare_string(void*, void*);

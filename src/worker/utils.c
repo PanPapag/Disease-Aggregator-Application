@@ -46,8 +46,12 @@ size_t hash_string(void* value) {
   return hash;
 }
 
-void print_string(void* v, FILE* out) {
+void print_string_ptr(void* v, FILE* out) {
   fprintf(out, "%s\n", *((char**) v));
+}
+
+void print_string(void* v, FILE* out) {
+  fprintf(out, "%s\n", (char*) v);
 }
 
 int compare_string(void* v, void* w) {
