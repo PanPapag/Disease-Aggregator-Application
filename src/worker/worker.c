@@ -56,14 +56,8 @@ int main(int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   }
   /* Read from the pipe the directories paths */
-  ssize_t bytes_read = 0;
-  char buffer[10];
-
-  while (bytes_read < 42) {
-    bytes_read += read(fd_read, buffer, 10);
-    printf("%s", buffer);
-  }
-  printf("\n");
+  char* dir_paths = read_in_chunks(fd_read, 10);
+  printf("%s\n",dir_paths);
 
   close(fd_read);
 
@@ -94,7 +88,9 @@ int main(int argc, char* argv[]) {
   // list_print(diseases_names, stdout);
   // list_print(countries_names, stdout);
 
+  /* Clear memory */
   execute_exit();
+  free(dir_paths);
 
   return EXIT_SUCCESS;
 }

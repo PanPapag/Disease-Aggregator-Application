@@ -10,9 +10,13 @@
 #include "../../includes/common/utils.h"
 
 void write_in_chunks(int fd, char* msg, size_t buffer_size) {
+  /* Communication Protocol */
+  // 1. Write the number of bytes that the reader should read
+  // 2. Write message
   char buffer[buffer_size];
   size_t msg_length = strlen(msg);
   ssize_t total_bytes = msg_length + (msg_length / (buffer_size - 1)) + 1;
+  write(fd, &total_bytes, sizeof(ssize_t));
   ssize_t bytes_written = 0;
   int counter = 0;
   while (bytes_written < total_bytes) {
@@ -24,6 +28,23 @@ void write_in_chunks(int fd, char* msg, size_t buffer_size) {
     buffer[buffer_size - 1] = '\0';
     bytes_written += write(fd, buffer, strlen(buffer) + 1);
   }
+}
+
+char* read_in_chunks(int fd, size_t buffer_size) {
+  ssize_t total_bytes;
+  ssize_t bytes_read = 0;
+  char buffer[buffer_size];
+  if (read(fd, &total_bytes, sizeof(ssize_t)) < 0) {
+    perror("Read");
+    exit(EXIT_FAILURE);
+  }
+  size_t message_size = total_bytes - (total_bytes / (buffer_size - 1));
+  char* message = (char*) malloc(message_size * sizeof(char));
+  while (bytes_read < total_bytes) {
+    bytes_read += read(fd, buffer, buffer_size);
+    strcat(message, buffer);
+  }
+  return message;
 }
 
 static void __report(const char* tag, const char* fmt, va_list args) {
