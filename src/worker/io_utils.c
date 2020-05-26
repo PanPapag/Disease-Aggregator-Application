@@ -30,7 +30,7 @@ void parse_directory(const char* dir_path) {
         size_t file_path_size = strlen(dir_path) + strlen(direntp->d_name) + 2;
         char *file_path = (char *) malloc(file_path_size * sizeof(char));
         if (file_path == NULL) {
-          report_error("Could not allocate memory for file path construction!");
+          report_error("Cannot allocate memory for the file path construction!");
           exit(EXIT_FAILURE);
         }
         // Construct full file path
@@ -66,13 +66,9 @@ void parse_file_and_update_structures(const char* dir_name,
     char* status = file_entry_tokens[1];
     if (!strcmp(status,"ENTER")) {
       patient_record_ptr patient_record = patient_record_create(file_entry_tokens, file_name, dir_name);
-      if (execute_insert_patient_record(patient_record) == ERROR) {
-        printf("ERROR 1\n");
-      }
+      execute_insert_patient_record(patient_record);
     } else {
-      if (execute_record_patient_exit(file_entry_tokens[0], file_name) == ERROR) {
-        printf("ERROR 2\n");
-      }
+      execute_record_patient_exit(file_entry_tokens[0], file_name);
     }
     /* Free wordexp object */
     wordfree(&p);

@@ -173,8 +173,8 @@ int execute_insert_patient_record(patient_record_ptr patient_record) {
       avl_insert(&country_avl, patient_record);
     }
   } else {
-    report_warning("Patient record with Record ID: <%s> already exists. ",
-                  patient_record->record_id);
+    // report_warning("Patient record with Record ID: <%s> already exists. ",
+    //               patient_record->record_id);
     /* Delete patient record and return */
     patient_record_delete(patient_record);
     return ERROR;
@@ -186,7 +186,7 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
   /* Search if patient record id exists */
   void* result = hash_table_find(patient_record_ht, id);
   if (result == NULL) {
-    report_warning("Patient record with Record ID: <%s> not found.", id);
+    // report_warning("Patient record with Record ID: <%s> not found.", id);
     return ERROR;
   } else {
     // Cast result to patient record pointer
@@ -199,8 +199,8 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
     strftime(entry_date_buffer, sizeof(entry_date_buffer), "%d-%m-%Y", &patient_record->entry_date);
     /* exit_date has to be greater than entry_date */
     if (compare_date_strings(entry_date_buffer, exit_date) > 0) {
-      report_warning("Entry Date [%s] is after the given Exit Date [%s].",
-                      entry_date_buffer, exit_date);
+      // report_warning("Entry Date [%s] is after the given Exit Date [%s].",
+      //                 entry_date_buffer, exit_date);
       return ERROR;
     }
     /* Check if exit date is not specified */
@@ -209,8 +209,8 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
       memset(&patient_record->exit_date, 0, sizeof(struct tm));
       strptime(exit_date, "%d-%m-%Y", &patient_record->exit_date);
     } else {
-      report_warning("Patient record Exit Date with Record ID: "
-                     "<%s> is already specified.", id);
+      // report_warning("Patient record Exit Date with Record ID: "
+      //                "<%s> is already specified.", id);
       return ERROR;
     }
   }

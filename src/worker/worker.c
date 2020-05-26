@@ -11,6 +11,7 @@
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
+#include "../../includes/common/statistics.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/commands.h"
@@ -22,8 +23,9 @@ extern hash_table_ptr patient_record_ht;
 extern hash_table_ptr disease_ht;
 extern hash_table_ptr country_ht;
 
-extern list_ptr diseases_names;
 extern list_ptr countries_names;
+extern list_ptr diseases_names;
+extern list_ptr files_statistics;
 
 int main(int argc, char* argv[]) {
   /* Extract command line arguments */
@@ -49,9 +51,12 @@ int main(int argc, char* argv[]) {
                                  NULL, avl_clear);
 
   /* Initialize a list to store all disease names */
-	diseases_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
+ 	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
   /* Initialize a list to store all disease names */
-	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
+	diseases_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
+  /* Initialize a list to store statistics for each file */
+  // files_statistics = list_create(statistics_ptr, compare_statistics_ptr,
+  //                                print_statistics_ptr, destroy_statistics_ptr);
 
   /* Open named pipe to read the directories paths */
   int read_fd = open(read_fifo, O_RDONLY);
@@ -59,19 +64,24 @@ int main(int argc, char* argv[]) {
     report_error("<%s> could not open named pipe: %s", argv[0], read_fifo);
     exit(EXIT_FAILURE);
   }
-  /* Read from the pipe the directories paths */
+  /* Read from the pipe the directories paths and parse them */
   char* dir_paths = read_in_chunks(read_fd, buffer_size);
-  printf("%s\n",dir_paths);
+  char* dir_path = strtok(dir_paths, SPACE);
+	while (dir_path != NULL) {
+    parse_directory(dir_path);
+		dir_path = strtok(NULL, SPACE);
+	}
 
+  /* Close file descriptors */
   close(read_fd);
-
+  /* Unlink named pipes */
   unlink(read_fifo);
   unlink(write_fifo);
+  /* Clear memory */
+  free(dir_paths);
+  execute_exit();
 
   // testing
-  // char* dir_name = "../input_dir/Argentina";
-  // parse_directory(dir_name);
-
   // DiseaseFrequency - NumPatients commands
   // char *ar[3];
   // ar[0] = "SARS-1";
@@ -92,9 +102,7 @@ int main(int argc, char* argv[]) {
   // list_print(diseases_names, stdout);
   // list_print(countries_names, stdout);
 
-  /* Clear memory */
-  execute_exit();
-  free(dir_paths);
+
 
   return EXIT_SUCCESS;
 }

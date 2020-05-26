@@ -50,6 +50,7 @@ char* read_in_chunks(int fd, size_t buffer_size) {
     exit(EXIT_FAILURE);
   }
   char* message = (char*) malloc((msg_length + 1) * sizeof(char));
+  memset(message, 0, sizeof(message));
   while (bytes_read < total_bytes) {
     bytes_read += read(fd, buffer, buffer_size);
     strcat(message, buffer);

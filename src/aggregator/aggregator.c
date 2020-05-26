@@ -89,6 +89,8 @@ int main(int argc, char* argv[]) {
       free(worker_dir_paths[i]);
       close(workers_fd_1[i]);
     }
+    // TODO delete it later 
+    wait(NULL);
     free(worker_dir_paths);
     /* Clear memory */
     list_clear(subdirs);
