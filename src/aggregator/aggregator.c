@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +20,7 @@ int main(int argc, char* argv[]) {
   /* Parse command line arguments and update program parameters */
   parse_arguments(&argc, argv);
   char buffer_size[12];
-  sprintf(buffer_size, "%d", parameters.buffer_size);
+  sprintf(buffer_size, "%lu", parameters.buffer_size);
   /* Spawn num_workers child proccesses */
   char fifo_1[12], fifo_2[12];
   pid_t workers_pid[parameters.num_workers];
@@ -68,13 +69,11 @@ int main(int argc, char* argv[]) {
     int workers_fd_2[parameters.num_workers];
     /* Get a list of all subdirectories included in the input directory */
     list_ptr subdirs = get_all_subdirs(parameters.input_dir);
+    /* Distribute sub directories to each worker */
+    char** worker_dir_paths = distribute_subdirs(subdirs, parameters.num_workers);
     /* Distribute directories paths and reconstruct named pipes to communicate */
     for (size_t i = 0; i < parameters.num_workers; ++i) {
-      /*
-        Get a string which contains the directories paths to be sent splitted by
-        space
-      */
-      char* dir_paths = "../input/Argentina ../input/Australia";
+      // TODO If no directories given in this worker, kill him
       /* Reconstruct named pipes given the children proccesses ids */
       sprintf(workers_fifo_1[i], "pw_cr_%d", workers_pid[i]);
       sprintf(workers_fifo_2[i], "pr_cw_%d", workers_pid[i]);
@@ -85,10 +84,12 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
       }
       /* Write to the pipe the directories paths */
-      write_in_chunks(workers_fd_1[i], dir_paths, parameters.buffer_size);
-      /* Close file descriptors */
+      write_in_chunks(workers_fd_1[i], worker_dir_paths[i], parameters.buffer_size);
+      /* Close file descriptors and clear memory */
+      free(worker_dir_paths[i]);
       close(workers_fd_1[i]);
     }
+    free(worker_dir_paths);
     /* Clear memory */
     list_clear(subdirs);
   }

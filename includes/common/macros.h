@@ -15,4 +15,6 @@
 
   #define STRING char*
 
+  #define SPACE " "
+
 #endif
