@@ -11,12 +11,14 @@
 
 void write_in_chunks(int fd, char* msg, size_t buffer_size) {
   /* Communication Protocol */
-  // 1. Write the number of bytes that the reader should read
-  // 2. Write message
+  // 1. Write the number of bytes that the write should write
+  // 2. Write the message length
+  // 2. Write the message
   char buffer[buffer_size];
   size_t msg_length = strlen(msg);
   ssize_t total_bytes = msg_length + (msg_length / (buffer_size - 1)) + 1;
   write(fd, &total_bytes, sizeof(ssize_t));
+  write(fd, &msg_length, sizeof(size_t));
   ssize_t bytes_written = 0;
   int counter = 0;
   while (bytes_written < total_bytes) {
@@ -31,15 +33,23 @@ void write_in_chunks(int fd, char* msg, size_t buffer_size) {
 }
 
 char* read_in_chunks(int fd, size_t buffer_size) {
-  ssize_t total_bytes;
+  /* Communication Protocol */
+  // 1. Read the number of bytes that the reader should read
+  // 2. Read the message length
+  // 2. Read the message
   ssize_t bytes_read = 0;
+  ssize_t total_bytes;
+  size_t msg_length;
   char buffer[buffer_size];
   if (read(fd, &total_bytes, sizeof(ssize_t)) < 0) {
     perror("Read");
     exit(EXIT_FAILURE);
   }
-  size_t message_size = total_bytes - (total_bytes / (buffer_size - 1));
-  char* message = (char*) malloc(message_size * sizeof(char));
+  if (read(fd, &msg_length, sizeof(size_t)) < 0) {
+    perror("Read");
+    exit(EXIT_FAILURE);
+  }
+  char* message = (char*) malloc((msg_length + 1) * sizeof(char));
   while (bytes_read < total_bytes) {
     bytes_read += read(fd, buffer, buffer_size);
     strcat(message, buffer);

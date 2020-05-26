@@ -26,6 +26,10 @@ extern list_ptr diseases_names;
 extern list_ptr countries_names;
 
 int main(int argc, char* argv[]) {
+  /* Extract command line arguments */
+  char* read_fifo = argv[1];
+  char* write_fifo = argv[2];
+  size_t buffer_size = atoi(argv[3]);
   const size_t no_buckets = 20;
   const size_t bucket_size = 64;
   /* patient_record_ht: record id --> pointer to patient record structure */
@@ -50,19 +54,19 @@ int main(int argc, char* argv[]) {
 	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
 
   /* Open named pipe to read the directories paths */
-  int fd_read = open(argv[1], O_RDONLY);
-  if (fd_read < 0) {
-    report_error("<%s> could not open named pipe: %s", argv[0], argv[1]);
+  int read_fd = open(read_fifo, O_RDONLY);
+  if (read_fd < 0) {
+    report_error("<%s> could not open named pipe: %s", argv[0], read_fifo);
     exit(EXIT_FAILURE);
   }
   /* Read from the pipe the directories paths */
-  char* dir_paths = read_in_chunks(fd_read, 10);
+  char* dir_paths = read_in_chunks(read_fd, buffer_size);
   printf("%s\n",dir_paths);
 
-  close(fd_read);
+  close(read_fd);
 
-  unlink(argv[1]);
-  unlink(argv[2]);
+  unlink(read_fifo);
+  unlink(write_fifo);
 
   // testing
   // char* dir_name = "../input_dir/Argentina";

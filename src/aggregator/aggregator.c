@@ -18,6 +18,8 @@ program_parameters_t parameters;
 int main(int argc, char* argv[]) {
   /* Parse command line arguments and update program parameters */
   parse_arguments(&argc, argv);
+  char buffer_size[12];
+  sprintf(buffer_size, "%d", parameters.buffer_size);
   /* Spawn num_workers child proccesses */
   char fifo_1[12], fifo_2[12];
   pid_t workers_pid[parameters.num_workers];
@@ -52,7 +54,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (pid == 0) {
-    execl("./worker", "worker", fifo_1, fifo_2, (char *) NULL);
+    execl("./worker", "worker", fifo_1, fifo_2, buffer_size, (char *) NULL);
     perror("execl() Execution Failed");
     exit(EXIT_FAILURE);
   } else {
