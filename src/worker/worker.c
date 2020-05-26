@@ -1,9 +1,16 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#include <sys/errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
+#include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/commands.h"
@@ -42,8 +49,24 @@ int main(int argc, char* argv[]) {
   /* Initialize a list to store all disease names */
 	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
 
-  /* Extract arguments */
-  printf("%s %s\n",argv[1], argv[2]);
+  /* Open named pipe to read the directories paths */
+  int fd_read = open(argv[1], O_RDONLY);
+  if (fd_read < 0) {
+    report_error("<%s> could not open named pipe: %s", argv[0], argv[1]);
+    exit(EXIT_FAILURE);
+  }
+  /* Read from the pipe the directories paths */
+  ssize_t bytes_read = 0;
+  char buffer[10];
+
+  while (bytes_read < 42) {
+    bytes_read += read(fd_read, buffer, 10);
+    printf("%s", buffer);
+  }
+  printf("\n");
+
+  close(fd_read);
+
   unlink(argv[1]);
   unlink(argv[2]);
 
