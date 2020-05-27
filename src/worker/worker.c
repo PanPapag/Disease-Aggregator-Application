@@ -19,9 +19,10 @@
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
 
-extern hash_table_ptr patient_record_ht;
-extern hash_table_ptr disease_ht;
+extern hash_table_ptr age_groups_ht;
 extern hash_table_ptr country_ht;
+extern hash_table_ptr disease_ht;
+extern hash_table_ptr patient_record_ht;
 
 extern list_ptr countries_names;
 extern list_ptr diseases_names;
@@ -55,8 +56,7 @@ int main(int argc, char* argv[]) {
   /* Initialize a list to store all disease names */
 	diseases_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
   /* Initialize a list to store statistics for each file */
-  // files_statistics = list_create(statistics_ptr, compare_statistics_ptr,
-  //                                print_statistics_ptr, destroy_statistics_ptr);
+  files_statistics = list_create(statistics_ptr, NULL, statistics_print, NULL);
 
   /* Open named pipe to read the directories paths */
   int read_fd = open(read_fifo, O_RDONLY);
@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
 		dir_path = strtok(NULL, SPACE);
 	}
 
+  list_print(files_statistics, stdout);
   /* Close file descriptors */
   close(read_fd);
   /* Unlink named pipes */

@@ -15,5 +15,9 @@
     char* disease;
     int age_ranges[4];
   } statistics_data_t;
-  
+
+  statistics_ptr statistics_create(char*);
+
+  void statistics_print(void*, FILE*);
+
 #endif

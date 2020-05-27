@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,4 +26,9 @@ statistics_ptr statistics_create(char* file_path) {
 
   /* Return statistics pointer */
   return statistics;
+}
+
+void statistics_print(void* v, FILE* out) {
+  statistics_ptr statistics = (statistics_ptr) v;
+  fprintf(out, "%s\n",statistics->file_path);
 }

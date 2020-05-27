@@ -15,12 +15,15 @@
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
 
-hash_table_ptr patient_record_ht;
-hash_table_ptr disease_ht;
+hash_table_ptr age_groups_ht;
 hash_table_ptr country_ht;
+hash_table_ptr disease_ht;
+hash_table_ptr patient_record_ht;
 
-list_ptr diseases_names;
 list_ptr countries_names;
+list_ptr diseases_names;
+list_ptr files_statistics;
+
 
 static inline
 void __count_patients_between(avl_node_ptr current_root,
