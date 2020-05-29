@@ -213,6 +213,19 @@ char* get_disease_id(patient_record_ptr patient_record) {
   return patient_record->disease_id;
 }
 
+int get_group_age(patient_record_ptr patient_record) {
+  switch (patient_record->age) {
+    case 0 ... 20:
+      return AGE_GROUP_1;
+    case 21 ... 40:
+      return AGE_GROUP_2;
+    case 41 ... 60:
+      return AGE_GROUP_3;
+    case 61 ... 120:
+      return AGE_GROUP_4;
+  }
+}
+
 struct tm get_entry_date(patient_record_ptr patient_record) {
   return patient_record->entry_date;
 }

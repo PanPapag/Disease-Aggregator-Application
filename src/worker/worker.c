@@ -19,7 +19,6 @@
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
 
-extern hash_table_ptr age_groups_ht;
 extern hash_table_ptr country_ht;
 extern hash_table_ptr disease_ht;
 extern hash_table_ptr patient_record_ht;
@@ -29,24 +28,22 @@ extern list_ptr diseases_names;
 extern list_ptr files_statistics;
 
 int main(int argc, char* argv[]) {
-  /* Extract command line arguments */
-  char* read_fifo = argv[1];
-  char* write_fifo = argv[2];
-  size_t buffer_size = atoi(argv[3]);
-  const size_t no_buckets = 20;
-  const size_t bucket_size = 64;
+  // /* Extract command line arguments */
+  // char* read_fifo = argv[1];
+  // char* write_fifo = argv[2];
+  // size_t buffer_size = atoi(argv[3]);
   /* patient_record_ht: record id --> pointer to patient record structure */
-  patient_record_ht = hash_table_create(no_buckets, bucket_size,
+  patient_record_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
                                         hash_string, compare_string,
                                         print_string, patient_record_print,
                                         NULL, patient_record_delete);
   /* Create Disease Hash Table */
-  disease_ht = hash_table_create(no_buckets, bucket_size,
+  disease_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
                                  hash_string, compare_string,
                                  print_string, avl_print_inorder,
                                  NULL, avl_clear);
   /* Create Country Hash Table */
-  country_ht = hash_table_create(no_buckets, bucket_size,
+  country_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
                                  hash_string, compare_string,
                                  print_string, avl_print_inorder,
                                  NULL, avl_clear);
@@ -55,31 +52,36 @@ int main(int argc, char* argv[]) {
  	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
   /* Initialize a list to store all disease names */
 	diseases_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
-  /* Initialize a list to store statistics for each file */
-  files_statistics = list_create(statistics_ptr, NULL, statistics_print, NULL);
 
-  /* Open named pipe to read the directories paths */
-  int read_fd = open(read_fifo, O_RDONLY);
-  if (read_fd < 0) {
-    report_error("<%s> could not open named pipe: %s", argv[0], read_fifo);
-    exit(EXIT_FAILURE);
-  }
-  /* Read from the pipe the directories paths and parse them */
-  char* dir_paths = read_in_chunks(read_fd, buffer_size);
-  char* dir_path = strtok(dir_paths, SPACE);
-	while (dir_path != NULL) {
-    parse_directory(dir_path);
-		dir_path = strtok(NULL, SPACE);
-	}
+  // /* Initialize a list to store statistics for each file */
+  // files_statistics = list_create(statistics_ptr, NULL, statistics_print, NULL);
+  //
+  // /* Open named pipe to read the directories paths */
+  // int read_fd = open(read_fifo, O_RDONLY);
+  // if (read_fd < 0) {
+  //   report_error("<%s> could not open named pipe: %s", argv[0], read_fifo);
+  //   exit(EXIT_FAILURE);
+  // }
+  // /* Read from the pipe the directories paths and parse them */
+  // char* dir_paths = read_in_chunks(read_fd, buffer_size);
+  // char* dir_path = strtok(dir_paths, SPACE);
+	// while (dir_path != NULL) {
+  //   parse_directory(dir_path);
+	// 	dir_path = strtok(NULL, SPACE);
+	// }
+  //
+  // list_print(files_statistics, stdout);
+  // /* Close file descriptors */
+  // close(read_fd);
+  // /* Unlink named pipes */
+  // unlink(read_fifo);
+  // unlink(write_fifo);
 
-  list_print(files_statistics, stdout);
-  /* Close file descriptors */
-  close(read_fd);
-  /* Unlink named pipes */
-  unlink(read_fifo);
-  unlink(write_fifo);
+  char* dir_path = "../input_dir/Argentina";
+  parse_directory(dir_path);
+
   /* Clear memory */
-  free(dir_paths);
+  // free(dir_paths);
   execute_exit();
 
   // testing

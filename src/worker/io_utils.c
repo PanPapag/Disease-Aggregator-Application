@@ -15,6 +15,13 @@
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
 
+void print_temp(void* v, FILE* out) {
+  int* temp = (int*) v;
+  for (int i = 0; i < 4; ++i) {
+    fprintf(out, "AGE GROUP %d - CASES %d\n",i, temp[i]);
+  }
+}
+
 void parse_directory(const char* dir_path) {
   struct dirent* direntp;
   DIR* dir_ptr = opendir(dir_path);
@@ -38,6 +45,7 @@ void parse_directory(const char* dir_path) {
         // The parsing of the file and the update of the structures is executed
         // by the function below
         parse_file_and_update_structures(dir_name, file_path, direntp->d_name);
+        printf("%s %s\n",direntp->d_name, dir_name);
         // Deallocate memory for the next one
         __FREE(file_path);
       }
@@ -54,8 +62,13 @@ void parse_file_and_update_structures(const char* dir_name,
   char** file_entry_tokens;
   int file_entry_no_tokens;
   wordexp_t p;
+  patient_record_ptr patient_record;
   /* Open file for read only - handles binary fille too */
   FILE* fp = fopen(file_path, "rb+");
+  /* age_groups_ht: disease_id --> array of int to store total cases per age group */
+  hash_table_ptr age_groups_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
+                                                   hash_string, NULL, NULL,
+                                                   NULL, NULL, NULL);
   /* Read file line by line */
   while (fgets(buffer, sizeof(buffer), fp) != NULL) {
     /* Discard '\n' that fgets() stores */
@@ -65,8 +78,8 @@ void parse_file_and_update_structures(const char* dir_name,
     file_entry_no_tokens = p.we_wordc;
     char* status = file_entry_tokens[1];
     if (!strcmp(status,"ENTER")) {
-      patient_record_ptr patient_record = patient_record_create(file_entry_tokens, file_name, dir_name);
-      execute_insert_patient_record(patient_record);
+      patient_record = patient_record_create(file_entry_tokens, file_name, dir_name);
+      execute_insert_patient_record(patient_record, age_groups_ht);
     } else {
       execute_record_patient_exit(file_entry_tokens[0], file_name);
     }

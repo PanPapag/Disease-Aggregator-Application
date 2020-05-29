@@ -9,12 +9,13 @@
   #define NO_PATIENT_RECORD_TOKENS 8
   #define PATIENT_RECORD_DELIMITER " "
   #define EXIT_DATE_NOT_SPECIFIED "00-01-1900"
+  #define NO_AGE_GROUPS 4
 
   enum age_groups {
-    GROUP_1,
-    GROUP_2,
-    GROUP_3,
-    GROUP_4
+    AGE_GROUP_1,
+    AGE_GROUP_2,
+    AGE_GROUP_3,
+    AGE_GROUP_4
   };
 
   enum patient_record_error_codes {
@@ -68,10 +69,11 @@
   char* get_country(patient_record_ptr);
   /* Utility function to get the disease id member of a patient record */
   char* get_disease_id(patient_record_ptr);
+  /* Utility function to get the age group of a patient record as defined above */
+  int get_group_age(patient_record_ptr);
   /* Utility function to get the entry date of a patient record */
   struct tm get_entry_date(patient_record_ptr);
   /* Utility function to get the exit date of a patient record */
   struct tm get_exit_date(patient_record_ptr);
-
 
 #endif

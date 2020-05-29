@@ -17,4 +17,8 @@
 
   #define SPACE " "
 
+  #define NO_BUCKETS 20
+
+  #define BUCKET_SIZE 64
+  
 #endif

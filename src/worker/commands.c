@@ -15,7 +15,6 @@
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
 
-hash_table_ptr age_groups_ht;
 hash_table_ptr country_ht;
 hash_table_ptr disease_ht;
 hash_table_ptr patient_record_ht;
@@ -23,7 +22,6 @@ hash_table_ptr patient_record_ht;
 list_ptr countries_names;
 list_ptr diseases_names;
 list_ptr files_statistics;
-
 
 static inline
 void __count_patients_between(avl_node_ptr current_root,
@@ -137,13 +135,34 @@ void execute_exit() {
   exit(EXIT_SUCCESS);
 }
 
-int execute_insert_patient_record(patient_record_ptr patient_record) {
+int execute_insert_patient_record(patient_record_ptr patient_record,
+                                  hash_table_ptr age_groups_ht) {
   void* result = hash_table_find(patient_record_ht, patient_record->record_id);
   /* If record Id not found */
   if (result == NULL) {
     /* Update patient record hash table */
     hash_table_insert(&patient_record_ht, patient_record->record_id, patient_record);
-    /* Search if patient record disease id exists */
+    /* Get the age group of the patient_record which just inserted */
+    int age_group_pos = get_group_age(patient_record);
+    /* Search if patient record disease_id exists in age_groups_ht */
+    result = hash_table_find(age_groups_ht, patient_record->disease_id);
+    if (result == NULL) {
+      /*
+        Create an array of size NO_AGE_GROUPS to store total number of cases
+        per age group
+      */
+      int* cases_per_age_group = (int*) malloc(NO_AGE_GROUPS * sizeof(int));
+      memset(cases_per_age_group, 0, sizeof(cases_per_age_group));
+      /* Update cases for the current age group with the given disease id */
+      cases_per_age_group[age_group_pos]++;
+      /* Insert to age_groups_ht */
+      hash_table_insert(&age_groups_ht, patient_record->disease_id, cases_per_age_group);
+    } else {
+      /* Update the total number of cases in current age group with the given disease id */
+      int* cases_per_age_group = (int*) result;
+      cases_per_age_group[age_group_pos]++;
+    }
+    /* Search if patient record disease_id exists in disease_ht */
     result = hash_table_find(disease_ht, patient_record->disease_id);
     if (result == NULL) {
       /* Store disease to global diseases_names list */
@@ -159,7 +178,7 @@ int execute_insert_patient_record(patient_record_ptr patient_record) {
       avl_ptr disease_avl = (avl_ptr) result;
       avl_insert(&disease_avl, patient_record);
     }
-    /* Search if patient record country exists */
+    /* Search if patient record country exists in country_ht */
     result = hash_table_find(country_ht, patient_record->country);
     if (result == NULL) {
       /* Store country to global countries_names list */
