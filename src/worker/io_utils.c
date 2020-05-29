@@ -10,19 +10,15 @@
 
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
+#include "../../includes/common/statistics.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/commands.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
 
-void print_temp(void* v, FILE* out) {
-  int* temp = (int*) v;
-  for (int i = 0; i < 4; ++i) {
-    fprintf(out, "AGE GROUP %d - CASES %d\n",i, temp[i]);
-  }
-}
-
 void parse_directory(const char* dir_path) {
+  hash_table_ptr age_groups_ht;
+  statistics_ptr statistics;
   struct dirent* direntp;
   DIR* dir_ptr = opendir(dir_path);
   if (dir_ptr == NULL) {
@@ -44,8 +40,13 @@ void parse_directory(const char* dir_path) {
         snprintf(file_path, file_path_size, "%s/%s", dir_path, direntp->d_name);
         // The parsing of the file and the update of the structures is executed
         // by the function below
-        parse_file_and_update_structures(dir_name, file_path, direntp->d_name);
-        printf("%s %s\n",direntp->d_name, dir_name);
+        age_groups_ht = parse_file_and_update_structures(dir_name, file_path,
+                                                         direntp->d_name);
+        // Create a statistics entry for the current file
+        // Store each statistics entry to a global list in order to send them via
+        // fifo to the disease aggregator
+        statistics = statistics_create(direntp->d_name, dir_name, age_groups_ht);
+        
         // Deallocate memory for the next one
         __FREE(file_path);
       }
@@ -54,9 +55,9 @@ void parse_directory(const char* dir_path) {
   }
 }
 
-void parse_file_and_update_structures(const char* dir_name,
-                                      const char* file_path,
-                                      const char* file_name) {
+hash_table_ptr parse_file_and_update_structures(const char* dir_name,
+                                                const char* file_path,
+                                                const char* file_name) {
   char buffer[MAX_BUFFER_SIZE];
   char* patient_record_tokens[NO_PATIENT_RECORD_TOKENS];
   char** file_entry_tokens;
@@ -67,8 +68,9 @@ void parse_file_and_update_structures(const char* dir_name,
   FILE* fp = fopen(file_path, "rb+");
   /* age_groups_ht: disease_id --> array of int to store total cases per age group */
   hash_table_ptr age_groups_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
-                                                   hash_string, NULL, NULL,
-                                                   NULL, NULL, NULL);
+                                                   hash_string, compare_string,
+                                                   print_string, age_groups_print,
+                                                   NULL, NULL);
   /* Read file line by line */
   while (fgets(buffer, sizeof(buffer), fp) != NULL) {
     /* Discard '\n' that fgets() stores */
@@ -88,4 +90,6 @@ void parse_file_and_update_structures(const char* dir_name,
   }
   /* Close file pointer */
   fclose(fp);
+  /* return age_groups_ht of the file that just being parsed */
+  return age_groups_ht;
 }

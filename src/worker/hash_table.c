@@ -79,16 +79,12 @@ void* __bucket_find(hash_table_ptr hash_table, bucket_ptr bucket, void* key) {
 static inline
 void __bucket_print(hash_table_ptr hash_table, bucket_ptr bucket, FILE* out) {
   for (size_t i = 0U; i != hash_table->bucket_entries_; ++i) {
-    if (bucket->table_[i].key_ != NULL) {
+    if (bucket->table_[i].key_ != NULL && bucket->table_[i].value_ != NULL) {
       if (hash_table->ht_key_print_func_ != NULL) {
-        printf("------------ KEY ------------\n");
         hash_table->ht_key_print_func_(bucket->table_[i].key_, out);
-        printf("-----------------------------\n");
       }
       if (hash_table->ht_value_print_func_ != NULL) {
-        printf("----------- VALUE -----------\n");
         hash_table->ht_value_print_func_(bucket->table_[i].value_, out);
-        printf("-----------------------------\n");
       }
     }
   }

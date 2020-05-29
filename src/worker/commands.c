@@ -151,8 +151,7 @@ int execute_insert_patient_record(patient_record_ptr patient_record,
         Create an array of size NO_AGE_GROUPS to store total number of cases
         per age group
       */
-      int* cases_per_age_group = (int*) malloc(NO_AGE_GROUPS * sizeof(int));
-      memset(cases_per_age_group, 0, sizeof(cases_per_age_group));
+      int* cases_per_age_group = (int*) calloc(NO_AGE_GROUPS, sizeof(int));
       /* Update cases for the current age group with the given disease id */
       cases_per_age_group[age_group_pos]++;
       /* Insert to age_groups_ht */
