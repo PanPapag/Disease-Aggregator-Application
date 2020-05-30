@@ -8,6 +8,8 @@
 
 #include <sys/types.h>
 
+#include "../../includes/common/hash_table.h"
+#include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/statistics.h"
@@ -16,9 +18,11 @@
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
 
+list_ptr files_statistics;
+
 void parse_directory(const char* dir_path) {
   hash_table_ptr age_groups_ht;
-  statistics_ptr statistics;
+  statistics_entry_ptr statistics_entry;
   struct dirent* direntp;
   DIR* dir_ptr = opendir(dir_path);
   if (dir_ptr == NULL) {
@@ -45,8 +49,8 @@ void parse_directory(const char* dir_path) {
         // Create a statistics entry for the current file
         // Store each statistics entry to a global list in order to send them via
         // fifo to the disease aggregator
-        statistics = statistics_create(direntp->d_name, dir_name, age_groups_ht);
-        
+        statistics_entry = statistics_entry_create(direntp->d_name, dir_name, age_groups_ht);
+        list_push_back(&files_statistics, &statistics_entry);
         // Deallocate memory for the next one
         __FREE(file_path);
       }
@@ -68,9 +72,9 @@ hash_table_ptr parse_file_and_update_structures(const char* dir_name,
   FILE* fp = fopen(file_path, "rb+");
   /* age_groups_ht: disease_id --> array of int to store total cases per age group */
   hash_table_ptr age_groups_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
-                                                   hash_string, compare_string,
-                                                   print_string, age_groups_print,
-                                                   NULL, NULL);
+                                                   string_hash, string_compare,
+                                                   string_print, age_groups_print,
+                                                   NULL, age_groups_destroy);
   /* Read file line by line */
   while (fgets(buffer, sizeof(buffer), fp) != NULL) {
     /* Discard '\n' that fgets() stores */

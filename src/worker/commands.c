@@ -2,15 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
+#include "../../includes/common/hash_table.h"
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
+#include "../../includes/common/statistics.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/commands.h"
-#include "../../includes/worker/hash_table.h"
 #include "../../includes/worker/heap.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
@@ -34,12 +34,12 @@ void __count_patients_between(avl_node_ptr current_root,
   /* Prune left search below this node as all entries have entry date < date1 */
   if (temp != NULL) {
     patient_record = (patient_record_ptr) temp->data_;
-    if (compare_date_tm(date1, cmp_field(patient_record)) <= 0) {
+    if (date_tm_compare(date1, cmp_field(patient_record)) <= 0) {
       __count_patients_between(temp->left_, cmp_field, counter, date1, date2, country);
     }
     patient_record = (patient_record_ptr) temp->data_;
     /* Check if patient_record exit date is not specified */
-    if (compare_date_tm(cmp_field(patient_record), date2) <= 0) {
+    if (date_tm_compare(cmp_field(patient_record), date2) <= 0) {
       /* Check upper bound */
       if (country != NULL) {
         if (!strcmp(country, patient_record->country)) {
@@ -143,7 +143,7 @@ int execute_insert_patient_record(patient_record_ptr patient_record,
     /* Update patient record hash table */
     hash_table_insert(&patient_record_ht, patient_record->record_id, patient_record);
     /* Get the age group of the patient_record which just inserted */
-    int age_group_pos = get_group_age(patient_record);
+    int age_group_pos = get_age_group(patient_record->age);
     /* Search if patient record disease_id exists in age_groups_ht */
     result = hash_table_find(age_groups_ht, patient_record->disease_id);
     if (result == NULL) {
@@ -197,7 +197,7 @@ int execute_insert_patient_record(patient_record_ptr patient_record,
     // report_warning("Patient record with Record ID: <%s> already exists. ",
     //               patient_record->record_id);
     /* Delete patient record and return */
-    patient_record_delete(patient_record);
+    patient_record_destroy(patient_record);
     return ERROR;
   }
   return PASS;
@@ -219,7 +219,7 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
     char entry_date_buffer[MAX_BUFFER_SIZE];
     strftime(entry_date_buffer, sizeof(entry_date_buffer), "%d-%m-%Y", &patient_record->entry_date);
     /* exit_date has to be greater than entry_date */
-    if (compare_date_strings(entry_date_buffer, exit_date) > 0) {
+    if (date_string_compare(entry_date_buffer, exit_date) > 0) {
       // report_warning("Entry Date [%s] is after the given Exit Date [%s].",
       //                 entry_date_buffer, exit_date);
       return ERROR;

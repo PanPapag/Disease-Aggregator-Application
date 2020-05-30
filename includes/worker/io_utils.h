@@ -1,7 +1,7 @@
 #ifndef __WORKER_IO_UTILS__
   #define __WORKER_IO_UTILS__
 
-  #include "./hash_table.h"
+  #include "../common/hash_table.h"
 
   enum handle_command_codes {
    PASS,

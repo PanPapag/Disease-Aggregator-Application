@@ -3,7 +3,7 @@ SDIR := src
 ODIR := .obj
 BDIR := build
 
-CC := gcc
+CC := gcc -std=gnu11
 CFLAGS := -g3
 CFLAGS += -I$(IDIR) -MMD
 

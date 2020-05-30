@@ -1,5 +1,5 @@
-#ifndef __WORKER_HASH_TABLE__
-  #define __WORKER_HASH_TABLE__
+#ifndef __COMMON_HASH_TABLE__
+  #define __COMMON_HASH_TABLE__
 
   #include <stdint.h>
   #include "../common/list.h"

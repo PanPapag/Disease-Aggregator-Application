@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../includes/common/hash_table.h"
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
-#include "../../includes/worker/hash_table.h"
 #include "../../includes/worker/io_utils.h"
 
 static inline

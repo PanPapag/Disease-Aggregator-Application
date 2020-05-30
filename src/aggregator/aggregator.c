@@ -8,6 +8,7 @@
 #include <sys/errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include "../../includes/common/list.h"
 #include "../../includes/common/io_utils.h"
@@ -89,7 +90,7 @@ int main(int argc, char* argv[]) {
       free(worker_dir_paths[i]);
       close(workers_fd_1[i]);
     }
-    // TODO delete it later 
+    // TODO delete it later
     wait(NULL);
     free(worker_dir_paths);
     /* Clear memory */

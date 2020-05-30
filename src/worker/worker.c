@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "../../includes/common/hash_table.h"
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
@@ -15,7 +16,6 @@
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/commands.h"
-#include "../../includes/worker/hash_table.h"
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
 
@@ -34,27 +34,28 @@ int main(int argc, char* argv[]) {
   // size_t buffer_size = atoi(argv[3]);
   /* patient_record_ht: record id --> pointer to patient record structure */
   patient_record_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
-                                        hash_string, compare_string,
-                                        print_string, patient_record_print,
-                                        NULL, patient_record_delete);
+                                        string_hash, string_compare,
+                                        string_print, patient_record_print,
+                                        NULL, patient_record_destroy);
   /* Create Disease Hash Table */
   disease_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
-                                 hash_string, compare_string,
-                                 print_string, avl_print_inorder,
+                                 string_hash, string_compare,
+                                 string_print, avl_print_inorder,
                                  NULL, avl_clear);
   /* Create Country Hash Table */
   country_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
-                                 hash_string, compare_string,
-                                 print_string, avl_print_inorder,
+                                 string_hash, string_compare,
+                                 string_print, avl_print_inorder,
                                  NULL, avl_clear);
 
   /* Initialize a list to store all disease names */
- 	countries_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
+ 	countries_names = list_create(STRING*, ptr_to_string_compare, ptr_to_string_print, NULL);
   /* Initialize a list to store all disease names */
-	diseases_names = list_create(STRING*, compare_string_ptr, print_string_ptr, NULL);
-
-  // /* Initialize a list to store statistics for each file */
-  // files_statistics = list_create(statistics_ptr, NULL, statistics_print, NULL);
+	diseases_names = list_create(STRING*, ptr_to_string_compare, ptr_to_string_print, NULL);
+  /* Initialize a list to store statistics for each file */
+  files_statistics = list_create(statistics_entry_ptr*, NULL,
+                                 ptr_to_statistics_entry_print,
+                                 ptr_to_statistics_entry_destroy);
   //
   // /* Open named pipe to read the directories paths */
   // int read_fd = open(read_fifo, O_RDONLY);
@@ -80,6 +81,8 @@ int main(int argc, char* argv[]) {
   char* dir_path = "../input_dir/Argentina";
   parse_directory(dir_path);
 
+  list_print(files_statistics, stdout);
+  list_clear(files_statistics);
   /* Clear memory */
   // free(dir_paths);
   execute_exit();

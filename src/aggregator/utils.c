@@ -14,8 +14,8 @@
 #include "../../includes/aggregator/utils.h"
 
 list_ptr get_all_subdirs(char* parent_dir) {
-  list_ptr result = list_create(STRING*, compare_string_ptr,
-                                print_string_ptr, destroy_string_ptr);
+  list_ptr result = list_create(STRING*, ptr_to_string_compare,
+                                ptr_to_string_print, ptr_to_string_destroy);
 
   struct stat path_stat;
   struct dirent* direntp;

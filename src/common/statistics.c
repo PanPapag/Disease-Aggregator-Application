@@ -7,44 +7,67 @@
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/statistics.h"
-#include "../../includes/worker/hash_table.h"
+#include "../../includes/common/hash_table.h"
 
-list_ptr diseases_names;
-
-statistics_ptr statistics_create(const char* file_name, const char* country,
-                                 hash_table_ptr age_groups_ht) {
+statistics_entry_ptr statistics_entry_create(const char* file_name,
+                                             const char* country,
+                                             hash_table_ptr age_groups_ht) {
   /* Allocate memory for patient_record_ptr */
-  statistics_ptr statistics = malloc(sizeof(*statistics));
-  if (statistics == NULL) {
-    report_error("Could not allocate memory for Statistics. Exiting...");
+  statistics_entry_ptr statistics_entry = malloc(sizeof(*statistics_entry));
+  if (statistics_entry == NULL) {
+    report_error("Could not allocate memory for Statistics Entry. Exiting...");
     exit(EXIT_FAILURE);
   }
-  /* Allocate memory for statistics file_name member */
-  statistics->file_name = (char*) malloc((strlen(file_name) + 1) * sizeof(char));
-  if (statistics->file_name == NULL) {
-    report_error("Could not allocate memory for Statistics file_path member. Exiting...");
+  /* Allocate memory for statistics_entry file_name member */
+  statistics_entry->file_name = (char*) malloc((strlen(file_name) + 1) * sizeof(char));
+  if (statistics_entry->file_name == NULL) {
+    report_error("Could not allocate memory for Statistics Entry file_path member. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(statistics->file_name, file_name);
-  /* Allocate memory for statistics country member */
-  statistics->country = (char*) malloc((strlen(country) + 1) * sizeof(char));
-  if (statistics->country == NULL) {
-    report_error("Could not allocate memory for Statistics file_path member. Exiting...");
+  strcpy(statistics_entry->file_name, file_name);
+  /* Allocate memory for statistics_entry country member */
+  statistics_entry->country = (char*) malloc((strlen(country) + 1) * sizeof(char));
+  if (statistics_entry->country == NULL) {
+    report_error("Could not allocate memory for Statistics Entry file_path member. Exiting...");
     exit(EXIT_FAILURE);
   }
-  strcpy(statistics->country, country);
+  strcpy(statistics_entry->country, country);
   /* Store hash_table pointer */
-  statistics->age_groups_ht = age_groups_ht;
-  /* Return statistics pointer */
-  return statistics;
+  statistics_entry->age_groups_ht = age_groups_ht;
+  /* Return statistics_entry pointer */
+  return statistics_entry;
 }
 
-void statistics_print(void* v, FILE* out) {
-  statistics_ptr statistics = (statistics_ptr) v;
-  fprintf(out, "%s\n",statistics->file_name);
-  fprintf(out, "%s\n\n",statistics->country);
-  hash_table_print(statistics->age_groups_ht, out);
+void ptr_to_statistics_entry_destroy(void* v) {
+  statistics_entry_ptr statistics_entry = *((statistics_entry_ptr*) v);
+  if (v != NULL) {
+    __FREE(statistics_entry->file_name);
+    __FREE(statistics_entry->country);
+    hash_table_clear(statistics_entry->age_groups_ht);
+  }
+  __FREE(statistics_entry);
+}
+
+void ptr_to_statistics_entry_print(void* v, FILE* out) {
+  statistics_entry_ptr statistics_entry = *((statistics_entry_ptr*) v);
+  fprintf(out, "%s\n", statistics_entry->file_name);
+  fprintf(out, "%s\n\n", statistics_entry->country);
+  hash_table_print(statistics_entry->age_groups_ht, out);
   fprintf(out, "------------------------------\n\n");
+}
+
+int get_age_group(uint8_t age) {
+  switch (age) {
+    case 0 ... 20:
+      return AGE_GROUP_1;
+    case 21 ... 40:
+      return AGE_GROUP_2;
+    case 41 ... 60:
+      return AGE_GROUP_3;
+    case 61 ... 120:
+      return AGE_GROUP_4;
+  }
+  return -1;
 }
 
 void age_groups_print(void* v, FILE* out) {
@@ -53,4 +76,11 @@ void age_groups_print(void* v, FILE* out) {
   fprintf(out, "Age range 21-40 years: %d cases\n", age_groups[1]);
   fprintf(out, "Age range 41-60 years: %d cases\n", age_groups[2]);
   fprintf(out, "Age range 60+ years: %d cases\n\n", age_groups[3]);
+}
+
+void age_groups_destroy(void* v) {
+  int* age_groups = (int*) v;
+  if (age_groups != NULL) {
+    __FREE(age_groups);
+  }
 }

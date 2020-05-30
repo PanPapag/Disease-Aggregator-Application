@@ -42,7 +42,7 @@ char* concat(int count, ...) {
   return merged;
 }
 
-size_t hash_uint(void* key) {
+size_t uint_hash(void* key) {
   unsigned int x = atoi(key);
   x = ((x >> 16) ^ x) * 0x45d9f3b;
   x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -50,28 +50,28 @@ size_t hash_uint(void* key) {
   return x;
 }
 
-int* create_int(int v) {
+int* int_create(int v) {
 	int* p = malloc(sizeof(int));
 	*p = v;
 	return p;
 }
 
-int compare_int(void* a, void* b) {
+int int_compare(void* a, void* b) {
 	return (*(int*)a) - (*(int*)b);
 }
 
-void print_int(void* v, FILE* out) {
+void int_print(void* v, FILE* out) {
 	fprintf(out, "%d\n", (*(int *)v));
 }
 
-void destroy_int(void* v) {
+void int_destroy(void* v) {
   if (v != NULL) {
     int* i = (int*) v;
     __FREE(i);
   }
 }
 
-size_t hash_string(void* value) {
+size_t string_hash(void* value) {
   // djb2 hash function
   size_t hash = 5381;
   for (char* s = value; *s != '\0'; s++) {
@@ -80,34 +80,34 @@ size_t hash_string(void* value) {
   return hash;
 }
 
-void print_string(void* v, FILE* out) {
+void string_print(void* v, FILE* out) {
   fprintf(out, "%s\n", (char*) v);
 }
 
-void print_string_ptr(void* v, FILE* out) {
-  fprintf(out, "%s\n", *((char**) v));
-}
-
-int compare_string(void* v, void* w) {
+int string_compare(void* v, void* w) {
   char* str1 = (char*) v;
   char* str2 = (char*) w;
   return strcmp(str1, str2);
 }
 
-void destroy_string(void *v) {
+void string_destroy(void *v) {
   if (v != NULL) {
     char* s = (char*) v;
     __FREE(s);
   }
 }
 
-int compare_string_ptr(void* v, void* w) {
+void ptr_to_string_print(void* v, FILE* out) {
+  fprintf(out, "%s\n", *((char**) v));
+}
+
+int ptr_to_string_compare(void* v, void* w) {
   char* str1 = (*(char**) v);
   char* str2 = (*(char**) w);
   return strcmp(str1, str2);
 }
 
-void destroy_string_ptr(void *v) {
+void ptr_to_string_destroy(void *v) {
   if (v != NULL) {
     char* s = (*(char**)v);
     __FREE(s);
@@ -170,7 +170,7 @@ int is_unspecified_date_tm(struct tm date) {
   return !strcmp(date_buf, "00-01-1900");
 }
 
-int64_t compare_date_strings(char* date1, const char* date2) {
+int64_t date_string_compare(char* date1, const char* date2) {
   // Convert date1 string to struct tm
   struct tm date1_tm;
   memset(&date1_tm, 0, sizeof(struct tm));
@@ -193,7 +193,7 @@ int64_t compare_date_strings(char* date1, const char* date2) {
   return date1_to_secs - date2_to_secs;
 }
 
-int64_t compare_date_tm(struct tm date1_tm, struct tm date2_tm) {
+int64_t date_tm_compare(struct tm date1_tm, struct tm date2_tm) {
   // Convert date1_tm to seconds
   char date1_buf[MAX_BUFFER_SIZE];
   strftime(date1_buf, sizeof(date1_buf), "%s", &date1_tm);

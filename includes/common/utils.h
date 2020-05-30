@@ -3,7 +3,7 @@
 
   #include <stdint.h>
 
-  #define _XOPEN_SOURCE
+  #define __USE_XOPEN
   #include <time.h>
 
   /* Converts a given string to 64 bits integer */
@@ -13,30 +13,30 @@
   char* concat(int count, ...);
 
   /* Hash Function for unsigned integers */
-  size_t hash_uint(void*);
+  size_t uint_create(void*);
   /* Returns an integer in a new memory address with the given value */
-  int* create_int(int);
+  int* int_create(int);
   /* Prints a given int* */
-  void print_int(void*, FILE* out);
+  void int_print(void*, FILE* out);
   /* Compares two given integers */
-  int compare_int(void*, void*);
+  int int_compare(void*, void*);
   /* Free a pointer to int */
-  void destroy_int(void*);
+  void int_destroy(void*);
 
   /* Hash Function for strings */
-  size_t hash_string(void*);
+  size_t string_hash(void*);
   /* Prints the given string */
-  void print_string(void*, FILE* out);
+  void string_print(void*, FILE* out);
   /* Compares two given strings */
-  int compare_string(void*, void*);
+  int string_compare(void*, void*);
   /* Free a pointer to char */
-  void destroy_string(void*);
+  void string_destroy(void*);
   /* Prints the value of a given string pointer */
-  void print_string_ptr(void*, FILE* out);
+  void ptr_to_string_print(void*, FILE* out);
   /* Compares two given string pointers */
-  int compare_string_ptr(void*, void*);
+  int ptr_to_string_compare(void*, void*);
   /* Free a pointer to char* */
-  void destroy_string_ptr(void*);
+  void ptr_to_string_destroy(void*);
 
   /* Checks if a string contains only letters and number */
   int is_alpharithmetic(char*);
@@ -58,13 +58,14 @@
     - > 0 if date1 is after of date2
     - < 0 if date1 is previous of date2
   */
-  int64_t compare_date_strings(char*, const char*);
+  int64_t date_string_compare(char*, const char*);
   /* Compares two given dates in struct tm format */
-  int64_t compare_date_tm(struct tm, struct tm);
+  int64_t date_tm_compare(struct tm, struct tm);
 
   /* Given an array of strings it returns the same array without the first string */
   char** prune_command_name(char**, size_t);
 
   /* Returns the last token given a string and a delimiter */
   char* get_last_token(const char*, char*);
+
 #endif

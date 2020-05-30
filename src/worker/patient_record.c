@@ -102,7 +102,7 @@ int64_t patient_record_compare(void* a, void* b) {
 	return pr1_entry_date_to_secs - pr2_entry_date_to_secs;
 }
 
-void patient_record_delete(void* v) {
+void patient_record_destroy(void* v) {
   patient_record_ptr patient_record = (patient_record_ptr) v;
   if (patient_record != NULL) {
     __FREE(patient_record->record_id);
@@ -155,7 +155,7 @@ int validate_patient_record_tokens(char** patient_record_tokens) {
   else {
     if (!is_unspecified_date_string(exit_date)) {
       /* Check if exit date is earlier than the entry date */
-      if (compare_date_strings(entry_date, exit_date) > 0)
+      if (date_string_compare(entry_date, exit_date) > 0)
         return INVALID_EARLIER_EXIT_DATE;
     }
   }
@@ -211,19 +211,6 @@ char* get_country(patient_record_ptr patient_record) {
 
 char* get_disease_id(patient_record_ptr patient_record) {
   return patient_record->disease_id;
-}
-
-int get_group_age(patient_record_ptr patient_record) {
-  switch (patient_record->age) {
-    case 0 ... 20:
-      return AGE_GROUP_1;
-    case 21 ... 40:
-      return AGE_GROUP_2;
-    case 41 ... 60:
-      return AGE_GROUP_3;
-    case 61 ... 120:
-      return AGE_GROUP_4;
-  }
 }
 
 struct tm get_entry_date(patient_record_ptr patient_record) {

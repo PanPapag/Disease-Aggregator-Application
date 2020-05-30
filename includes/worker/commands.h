@@ -1,8 +1,11 @@
 #ifndef __WORKER_COMMANDS__
   #define __WORKER_COMMANDS__
 
-  #include "./hash_table.h"
+  #include "../common/hash_table.h"
   #include "./patient_record.h"
+
+  #define __USE_XOPEN
+  #include <time.h>
 
   enum command_codes {
       INVALID_COMMAND,
