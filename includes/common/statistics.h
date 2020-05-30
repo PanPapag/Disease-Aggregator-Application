@@ -5,6 +5,9 @@
 
   #include <stdint.h>
 
+  #define FIELDS_DEL '$'
+  #define DISEASE_DEL ':'
+  #define AGE_GROUPS_DEL '@'
   #define NO_AGE_GROUPS 4
 
   enum age_groups {
@@ -31,7 +34,8 @@
   void ptr_to_statistics_entry_destroy(void*);
   /* Utility function to print a pointer to statistics entry */
   void ptr_to_statistics_entry_print(void*, FILE*);
-
+  /* Returns a string representing the content of the given ptr to statistics entry */
+  char* ptr_to_statistics_entry_serialize(void*);
   /* Given age this function return the enumared age group */
   int get_age_group(uint8_t);
   /* Prints the numberf of cases in the array of age groups */

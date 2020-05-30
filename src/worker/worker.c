@@ -81,8 +81,15 @@ int main(int argc, char* argv[]) {
   char* dir_path = "../input_dir/Argentina";
   parse_directory(dir_path);
 
-  list_print(files_statistics, stdout);
+  for (size_t i = 1U; i <= list_size(files_statistics); ++i) {
+    list_node_ptr list_node = list_get(files_statistics, i);
+    char* res = ptr_to_statistics_entry_serialize(list_node->data_);
+    printf("%s\n", res);
+    free(res);
+  }
+
   list_clear(files_statistics);
+
   /* Clear memory */
   // free(dir_paths);
   execute_exit();
