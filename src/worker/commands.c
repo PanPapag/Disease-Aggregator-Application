@@ -130,8 +130,9 @@ void execute_exit() {
   hash_table_clear(patient_record_ht);
   hash_table_clear(disease_ht);
   hash_table_clear(country_ht);
-  list_clear(diseases_names);
   list_clear(countries_names);
+  list_clear(diseases_names);
+  list_clear(files_statistics);
   exit(EXIT_SUCCESS);
 }
 

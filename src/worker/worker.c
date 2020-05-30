@@ -29,9 +29,9 @@ extern list_ptr files_statistics;
 
 int main(int argc, char* argv[]) {
   // /* Extract command line arguments */
-  // char* read_fifo = argv[1];
-  // char* write_fifo = argv[2];
-  // size_t buffer_size = atoi(argv[3]);
+  char* read_fifo = argv[1];
+  char* write_fifo = argv[2];
+  size_t buffer_size = atoi(argv[3]);
   /* patient_record_ht: record id --> pointer to patient record structure */
   patient_record_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
                                         string_hash, string_compare,
@@ -56,42 +56,40 @@ int main(int argc, char* argv[]) {
   files_statistics = list_create(statistics_entry_ptr*, NULL,
                                  ptr_to_statistics_entry_print,
                                  ptr_to_statistics_entry_destroy);
-  //
-  // /* Open named pipe to read the directories paths */
-  // int read_fd = open(read_fifo, O_RDONLY);
-  // if (read_fd < 0) {
-  //   report_error("<%s> could not open named pipe: %s", argv[0], read_fifo);
-  //   exit(EXIT_FAILURE);
-  // }
-  // /* Read from the pipe the directories paths and parse them */
-  // char* dir_paths = read_in_chunks(read_fd, buffer_size);
-  // char* dir_path = strtok(dir_paths, SPACE);
-	// while (dir_path != NULL) {
-  //   parse_directory(dir_path);
-	// 	dir_path = strtok(NULL, SPACE);
-	// }
-  //
-  // list_print(files_statistics, stdout);
-  // /* Close file descriptors */
-  // close(read_fd);
-  // /* Unlink named pipes */
-  // unlink(read_fifo);
-  // unlink(write_fifo);
 
-  char* dir_path = "../input_dir/Argentina";
-  parse_directory(dir_path);
+  /* Open named pipe to read the directories paths as well as the application commands */
+  int read_fd = open(read_fifo, O_RDONLY);
+  if (read_fd < 0) {
+    report_error("<%s> could not open named pipe: %s", argv[0], read_fifo);
+    exit(EXIT_FAILURE);
+  }
+  /* Read from the pipe the directories paths and parse them */
+  char* dir_paths = read_in_chunks(read_fd, buffer_size);
+  char* dir_path = strtok(dir_paths, SPACE);
+	while (dir_path != NULL) {
+    parse_directory(dir_path);
+		dir_path = strtok(NULL, SPACE);
+	}
 
+  /* Open named pipe to write the statistics as well as the results from the commands */
+  int write_fd = open(write_fifo, O_WRONLY);
+  if (write_fd < 0) {
+    report_error("<%s> could not open named pipe: %s", argv[0], write_fifo);
+    exit(EXIT_FAILURE);
+  }
+  /* Write to the pipe the files statistics */
   for (size_t i = 1U; i <= list_size(files_statistics); ++i) {
     list_node_ptr list_node = list_get(files_statistics, i);
-    char* res = ptr_to_statistics_entry_serialize(list_node->data_);
-    printf("%s\n", res);
-    free(res);
+    char* serialized_statistics_entry = ptr_to_statistics_entry_serialize(list_node->data_);
+    write_in_chunks(write_fd, serialized_statistics_entry, buffer_size);
+    free(serialized_statistics_entry);
   }
 
-  list_clear(files_statistics);
-
+  /* Close file descriptors */
+  close(write_fd);
+  close(read_fd);
   /* Clear memory */
-  // free(dir_paths);
+  free(dir_paths);
   execute_exit();
 
   // testing

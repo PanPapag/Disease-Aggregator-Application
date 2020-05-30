@@ -23,11 +23,11 @@ int main(int argc, char* argv[]) {
   char buffer_size[12];
   sprintf(buffer_size, "%lu", parameters.buffer_size);
   /* Spawn num_workers child proccesses */
-  char fifo_1[12], fifo_2[12];
+  char fifo_1[15], fifo_2[15];
   pid_t workers_pid[parameters.num_workers];
   pid_t pid;
   size_t proccess_cnt;
-  int ret_val;
+  int ret_val, status;
   for (proccess_cnt = 0; proccess_cnt < parameters.num_workers; ++proccess_cnt) {
     pid = fork();
     if (pid == -1) {
@@ -64,8 +64,8 @@ int main(int argc, char* argv[]) {
       Each child proccess communicates with the parent via two file descriptors,
       one for writing and one for reading.
     */
-    char workers_fifo_1[parameters.num_workers][12];
-    char workers_fifo_2[parameters.num_workers][12];
+    char workers_fifo_1[parameters.num_workers][15];
+    char workers_fifo_2[parameters.num_workers][15];
     int workers_fd_1[parameters.num_workers];
     int workers_fd_2[parameters.num_workers];
     /* Get a list of all subdirectories included in the input directory */
@@ -78,7 +78,10 @@ int main(int argc, char* argv[]) {
       /* Reconstruct named pipes given the children proccesses ids */
       sprintf(workers_fifo_1[i], "pw_cr_%d", workers_pid[i]);
       sprintf(workers_fifo_2[i], "pr_cw_%d", workers_pid[i]);
-      /* Open named pipe for writing the directories paths to be sent */
+      /*
+        Open named pipe for writing the directories paths to be sent as well as
+        distributing the application commands given from stdin
+      */
       workers_fd_1[i] = open(workers_fifo_1[i], O_WRONLY);
       if (workers_fd_1[i] < 0) {
         report_error("<diseaseAggregator> could not open named pipe: %s", workers_fifo_1[i]);
@@ -86,14 +89,38 @@ int main(int argc, char* argv[]) {
       }
       /* Write to the pipe the directories paths */
       write_in_chunks(workers_fd_1[i], worker_dir_paths[i], parameters.buffer_size);
+      /*
+        Open named pipe for reading files statistics as well as the results
+        from the commands sent to workers
+      */
+      workers_fd_2[i] = open(workers_fifo_2[i], O_RDONLY);
+      if (workers_fd_2[i] < 0) {
+        report_error("<diseaseAggregator> could not open named pipe: %s", workers_fifo_2[i]);
+        exit(EXIT_FAILURE);
+      }
+      /* Read from the pipe the files statistics */
+      // num_workers = 3 => 50 files per worker, that can be sent via pipe (at first)
+
+      for (size_t k = 0; k < 50; ++k) {
+        char* files_statistics = read_in_chunks(workers_fd_2[i], parameters.buffer_size);
+        printf("%s\n", files_statistics);
+      }
       /* Close file descriptors and clear memory */
       free(worker_dir_paths[i]);
-      close(workers_fd_1[i]);
     }
-    // TODO delete it later
-    wait(NULL);
-    free(worker_dir_paths);
+    /*
+      Wait for all child proccesses to finish and then close file descriptors
+      and delete named pipes
+    */
+    wait(&status);
+    for (size_t i = 0; i < parameters.num_workers; ++i) {
+      close(workers_fd_1[i]);
+      close(workers_fd_2[i]);
+      unlink(workers_fifo_1[i]);
+      unlink(workers_fifo_2[i]);
+    }
     /* Clear memory */
+    free(worker_dir_paths);
     list_clear(subdirs);
   }
 

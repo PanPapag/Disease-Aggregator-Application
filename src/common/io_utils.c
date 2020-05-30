@@ -21,13 +21,17 @@ void write_in_chunks(int fd, char* msg, size_t buffer_size) {
   write(fd, &msg_length, sizeof(size_t));
   ssize_t bytes_written = 0;
   int counter = 0;
+  // printf("%d %zd %ld %s\n", fd, total_bytes, msg_length, msg);
   while (bytes_written < total_bytes) {
-    for (size_t i = 0; i < buffer_size - 1; ++i) {
-      if (counter <= msg_length) {
+    size_t i;
+    for (i = 0; i < buffer_size - 1; ++i) {
+      if (counter < msg_length) {
         buffer[i] = msg[counter++];
+      } else {
+        break;
       }
     }
-    buffer[buffer_size - 1] = '\0';
+    buffer[i] = '\0';
     bytes_written += write(fd, buffer, strlen(buffer) + 1);
   }
 }
@@ -36,25 +40,38 @@ char* read_in_chunks(int fd, size_t buffer_size) {
   /* Communication Protocol */
   // 1. Read the number of bytes that the reader should read
   // 2. Read the message length
-  // 2. Read the message
+  // 3. Read the message
   ssize_t bytes_read = 0;
+  int current_read = 0;
   ssize_t total_bytes;
   size_t msg_length;
   char buffer[buffer_size];
-  if (read(fd, &total_bytes, sizeof(ssize_t)) < 0) {
+
+  if (read(fd, &total_bytes, sizeof(ssize_t)) <= 0) {
     perror("Read");
     exit(EXIT_FAILURE);
   }
-  if (read(fd, &msg_length, sizeof(size_t)) < 0) {
+
+  if (read(fd, &msg_length, sizeof(size_t)) <= 0) {
     perror("Read");
     exit(EXIT_FAILURE);
   }
-  char* message = (char*) malloc((msg_length + 1) * sizeof(char));
-  memset(message, 0, sizeof(message));
+
+  /* Calculate how many read system call we need */
+  int num_reads = (total_bytes / buffer_size) + 1;
+
+  char* message = (char*) calloc(msg_length + 1, sizeof(char));
   while (bytes_read < total_bytes) {
-    bytes_read += read(fd, buffer, buffer_size);
+    if (current_read < num_reads - 1) {
+      bytes_read += read(fd, buffer, buffer_size);
+    } else {
+      size_t last_buffer_size = total_bytes - buffer_size * (num_reads - 1);
+      bytes_read += read(fd, buffer, last_buffer_size);
+    }
+    current_read++;
     strcat(message, buffer);
   }
+
   return message;
 }
 
