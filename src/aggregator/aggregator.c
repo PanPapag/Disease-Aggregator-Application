@@ -11,7 +11,9 @@
 #include <sys/wait.h>
 
 #include "../../includes/common/list.h"
+#include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
+#include "../../includes/common/statistics.h"
 #include "../../includes/aggregator/io_utils.h"
 #include "../../includes/aggregator/utils.h"
 
@@ -100,19 +102,14 @@ int main(int argc, char* argv[]) {
       }
       /* Read from the pipe the files statistics */
       // num_workers = 3 => 50 files per worker, that can be sent via pipe (at first)
-
       for (size_t k = 0; k < 50; ++k) {
-        char* files_statistics = read_in_chunks(workers_fd_2[i], parameters.buffer_size);
-        printf("%s\n", files_statistics);
+        char* serialized_statistics_entry = read_in_chunks(workers_fd_2[i], parameters.buffer_size);
+        serialized_statistics_entry_print(serialized_statistics_entry);
+        __FREE(serialized_statistics_entry);
       }
       /* Close file descriptors and clear memory */
-      free(worker_dir_paths[i]);
+      __FREE(worker_dir_paths[i]);
     }
-    /*
-      Wait for all child proccesses to finish and then close file descriptors
-      and delete named pipes
-    */
-    wait(&status);
     for (size_t i = 0; i < parameters.num_workers; ++i) {
       close(workers_fd_1[i]);
       close(workers_fd_2[i]);
@@ -120,7 +117,7 @@ int main(int argc, char* argv[]) {
       unlink(workers_fifo_2[i]);
     }
     /* Clear memory */
-    free(worker_dir_paths);
+    __FREE(worker_dir_paths);
     list_clear(subdirs);
   }
 

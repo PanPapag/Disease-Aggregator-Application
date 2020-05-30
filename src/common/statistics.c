@@ -3,11 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../includes/common/hash_table.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/statistics.h"
-#include "../../includes/common/hash_table.h"
+#include "../../includes/common/utils.h"
 
 list_ptr diseases_names;
 
@@ -111,6 +112,63 @@ char* ptr_to_statistics_entry_serialize(void* v) {
     }
   }
   return serialized_statistics_entry;
+}
+
+static inline
+void __serialized_cases_token_print(char* serialized_cases_token) {
+  char* cases_token = strtok(serialized_cases_token, "@");
+  int counter = 0;
+  while (cases_token != NULL) {
+    switch (counter) {
+      case AGE_GROUP_1:
+        printf("Age range 0-20 years: %s cases\n", cases_token);
+        break;
+      case AGE_GROUP_2:
+        printf("Age range 21-40 years: %s cases\n", cases_token);
+        break;
+      case AGE_GROUP_3:
+        printf("Age range 41-60 years: %s cases\n", cases_token);
+        break;
+      case AGE_GROUP_4:
+        printf("Age range 60+ years: %s cases\n", cases_token);
+        break;
+    }
+    counter++;
+    cases_token = strtok(NULL, "@");
+  }
+}
+
+static inline
+void __serialized_disease_token_print(char* serialized_disease_token) {
+  char* disease_id = strtok(serialized_disease_token, ":");
+  printf("\n%s\n",disease_id);
+  char* num_cases_token = strtok(NULL, ":");
+  __serialized_cases_token_print(num_cases_token);
+}
+
+void serialized_statistics_entry_print(char* serialized_statistics_entry) {
+  /* Store in a list all the field tokens */
+  list_ptr field_tokens = list_create(STRING*, ptr_to_string_compare,
+                                      ptr_to_string_print, NULL);
+
+  char* field_token = strtok(serialized_statistics_entry, "$");
+  while (field_token != NULL) {
+    list_push_back(&field_tokens, &field_token);
+    field_token = strtok(NULL, "$");
+  }
+
+  for (size_t i = 1U; i <= list_size(field_tokens); ++i) {
+    list_node_ptr list_node = list_get(field_tokens, i);
+    char* data = (*(char**) list_node->data_);
+    if (i <= 2) {
+      printf("%s\n", data);
+    } else {
+      __serialized_disease_token_print(data);
+    }
+  }
+  printf("\n-------------------------------------\n\n");
+  /* Clear memory allocated by temporary list field_tokens */
+  list_clear(field_tokens);
 }
 
 int get_age_group(uint8_t age) {

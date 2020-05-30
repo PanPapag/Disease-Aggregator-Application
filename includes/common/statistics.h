@@ -36,6 +36,8 @@
   void ptr_to_statistics_entry_print(void*, FILE*);
   /* Returns a string representing the content of the given ptr to statistics entry */
   char* ptr_to_statistics_entry_serialize(void*);
+  /* Utility function to print a serialized statistics_entry */
+  void serialized_statistics_entry_print(char*);
   /* Given age this function return the enumared age group */
   int get_age_group(uint8_t);
   /* Prints the numberf of cases in the array of age groups */
