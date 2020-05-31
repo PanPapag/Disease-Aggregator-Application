@@ -117,13 +117,23 @@ void execute_num_patients_admissions(int argc, char** argv) {
     avl_ptr disease_avl = (avl_ptr) result;
     int num_patients;
     if (argc == 3){
-      num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], NULL);
+      char num_writes_buffer[12];
+      sprintf(num_writes_buffer, "%ld", list_size(countries_names));
+      write_in_chunks(parameters.write_fd, num_writes_buffer, parameters.buffer_size);
+      for (size_t i = 1U; i <= list_size(countries_names); ++i) {
+        list_node_ptr list_node = list_get(countries_names, i);
+        char* country_name = (*(char**) list_node->data_);
+        num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], country_name);
+        char output_buffer[MAX_BUFFER_SIZE];
+        sprintf(output_buffer, "%s %d", country_name, num_patients);
+        write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
+      }
     } else {
       num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], argv[3]);
+      char num_patients_buffer[12];
+      sprintf(num_patients_buffer, "%d", num_patients);
+      write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
     }
-    char num_patients_buffer[12];
-    sprintf(num_patients_buffer, "%d", num_patients);
-    write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
   }
 }
 
@@ -135,25 +145,24 @@ void execute_num_patients_discharges(int argc, char** argv) {
     avl_ptr disease_avl = (avl_ptr) result;
     int num_patients;
     if (argc == 3){
-      num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], NULL);
+      char num_writes_buffer[12];
+      sprintf(num_writes_buffer, "%ld", list_size(countries_names));
+      write_in_chunks(parameters.write_fd, num_writes_buffer, parameters.buffer_size);
+      for (size_t i = 1U; i <= list_size(countries_names); ++i) {
+        list_node_ptr list_node = list_get(countries_names, i);
+        char* country_name = (*(char**) list_node->data_);
+        num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], country_name);
+        char output_buffer[MAX_BUFFER_SIZE];
+        sprintf(output_buffer, "%s %d", country_name, num_patients);
+        write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
+      }
     } else {
       num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], argv[3]);
+      char num_patients_buffer[12];
+      sprintf(num_patients_buffer, "%d", num_patients);
+      write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
     }
-    char num_patients_buffer[12];
-    sprintf(num_patients_buffer, "%d", num_patients);
-    write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
   }
-}
-
-void execute_exit() {
-  /* Free all memory allocated by the program */
-  hash_table_clear(patient_record_ht);
-  hash_table_clear(disease_ht);
-  hash_table_clear(country_ht);
-  list_clear(countries_names);
-  list_clear(diseases_names);
-  list_clear(files_statistics);
-  exit(EXIT_SUCCESS);
 }
 
 int execute_insert_patient_record(patient_record_ptr patient_record,
@@ -257,4 +266,15 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
     }
   }
   return PASS;
+}
+
+void execute_exit(void) {
+  /* Free all memory allocated by the program */
+  hash_table_clear(patient_record_ht);
+  hash_table_clear(disease_ht);
+  hash_table_clear(country_ht);
+  list_clear(countries_names);
+  list_clear(diseases_names);
+  list_clear(files_statistics);
+  exit(EXIT_SUCCESS);
 }

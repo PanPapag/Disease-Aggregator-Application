@@ -202,7 +202,6 @@ void aggregate_num_patient_admissions(int argc, char** argv, char* command) {
     correspoding country directory.
     Otherwise, push the command to every worker
   */
-  int total_disease_cases = 0;
   if (argc == 4) {
     void* result = hash_table_find(country_to_pid_ht, argv[argc-1]);
     if (result != NULL) {
@@ -211,19 +210,22 @@ void aggregate_num_patient_admissions(int argc, char** argv, char* command) {
       write_in_chunks(parameters.workers_fd_1[pos], command, parameters.buffer_size);
       char* result = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
       if (strcmp(result, NO_RESPONSE)) {
-        total_disease_cases += atoi(result);
+        printf("%s %d\n", argv[argc-1], atoi(result));
       }
     }
   } else {
     for (size_t i = 0U; i < parameters.num_workers; ++i) {
       write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
-      char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
-      if (strcmp(result, NO_RESPONSE)) {
-        total_disease_cases += atoi(result);
+      char* num_reads_buffer = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+      int num_reads = atoi(num_reads_buffer);
+      for (size_t j = 0U; j < num_reads; ++j) {
+        char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+        if (strcmp(result, NO_RESPONSE)) {
+          printf("%s\n", result);
+        }
       }
     }
   }
-  printf("%d\n", total_disease_cases);
 }
 
 int validate_num_patient_discharges(int argc, char** argv) {
@@ -275,7 +277,6 @@ void aggregate_num_patient_discharges(int argc, char** argv, char* command) {
     correspoding country directory.
     Otherwise, push the command to every worker
   */
-  int total_disease_cases = 0;
   if (argc == 4) {
     void* result = hash_table_find(country_to_pid_ht, argv[argc-1]);
     if (result != NULL) {
@@ -284,19 +285,22 @@ void aggregate_num_patient_discharges(int argc, char** argv, char* command) {
       write_in_chunks(parameters.workers_fd_1[pos], command, parameters.buffer_size);
       char* result = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
       if (strcmp(result, NO_RESPONSE)) {
-        total_disease_cases += atoi(result);
+        printf("%s %d\n", argv[argc-1], atoi(result));
       }
     }
   } else {
     for (size_t i = 0U; i < parameters.num_workers; ++i) {
       write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
-      char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
-      if (strcmp(result, NO_RESPONSE)) {
-        total_disease_cases += atoi(result);
+      char* num_reads_buffer = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+      int num_reads = atoi(num_reads_buffer);
+      for (size_t j = 0U; j < num_reads; ++j) {
+        char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+        if (strcmp(result, NO_RESPONSE)) {
+          printf("%s\n", result);
+        }
       }
     }
   }
-  printf("%d\n", total_disease_cases);
 }
 
 int validate_exit(int argc, char** argv) {

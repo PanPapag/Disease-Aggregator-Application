@@ -12,7 +12,6 @@
       VALID_COMMAND
     };
 
-
   void execute_disease_frequency(int, char**);
 
   void execute_num_patients_admissions(int, char**);
