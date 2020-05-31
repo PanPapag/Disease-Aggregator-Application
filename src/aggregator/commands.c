@@ -120,24 +120,31 @@ int validate_search_patient_record(int argc, char** argv) {
 
 void aggregate_search_patient_record(char* command) {
   fd_set rfds;
-  // FD_ZERO(&rfds);
+  FD_ZERO(&rfds);
   for (size_t i = 0U; i < parameters.num_workers; ++i) {
     write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
-    // FD_SET(parameters.workers_fd_2[i], &rfds);
-    char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
-    if (strcmp(result, NO_RESPONSE)) {
-      printf("%s\n", result);
+    FD_SET(parameters.workers_fd_2[i], &rfds);
+  }
+  int counter = 0;
+  int stop = 0;
+  while (!stop) {
+    int retval = select(FD_SETSIZE, &rfds, NULL, NULL, NULL);
+    if (retval == -1) {
+      perror("select()");
+    } else if (retval) {
+      for (size_t i = 0U; i < parameters.num_workers; ++i) {
+        if (FD_ISSET(parameters.workers_fd_2[i], &rfds)) {
+          char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+          if (strcmp(result, NO_RESPONSE)) {
+            printf("%s\n", result);
+          }
+          if (++counter == parameters.num_workers) {
+            stop = 1;
+          }
+        }
+      }
     }
   }
-  // int retval = select(parameters.num_workers, &rfds, NULL, NULL, NULL);
-  // if (retval == -1) {
-  //   perror("select()");
-  // } else if (retval) {
-  //   char* result = read_in_chunks(retval, parameters.buffer_size);
-  //   if (strcmp(result, NO_RESPONSE)) {
-  //     printf("%s\n", result);
-  //   }
-  // }
 }
 
 int validate_num_patient_admissions(int argc, char** argv) {
