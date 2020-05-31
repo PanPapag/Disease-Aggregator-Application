@@ -97,8 +97,7 @@ void __handle_command(char command[]) {
     if (validate_disease_frequency(command_no_tokens, command_tokens)) {
       command_argv = prune_command_name(command_tokens, command_no_tokens);
       command_argc = command_no_tokens - 1;
-      printf("DISEASE FREQUENCY CORRECT\n");
-      // aggregate_disease_frequency(command_argc, command_argv);
+      aggregate_disease_frequency(command_argc, command_argv, command);
       __FREE(command_argv);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
@@ -129,8 +128,7 @@ void __handle_command(char command[]) {
     if (validate_num_patient_admissions(command_no_tokens, command_tokens)) {
       command_argv = prune_command_name(command_tokens, command_no_tokens);
       command_argc = command_no_tokens - 1;
-      printf("NUM PATIENT ADMISSIONS CORRECT\n");
-      // execute_disease_frequency(command_argc, command_argv);
+      aggregate_num_patient_admissions(command_argc, command_argv, command);
       __FREE(command_argv);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
@@ -140,8 +138,7 @@ void __handle_command(char command[]) {
     if (validate_num_patient_discharges(command_no_tokens, command_tokens)) {
       command_argv = prune_command_name(command_tokens, command_no_tokens);
       command_argc = command_no_tokens - 1;
-      printf("NUM PATIENT DISCHARGES CORRECT\n");
-      // execute_disease_frequency(command_argc, command_argv);
+      aggregate_num_patient_admissions(command_argc, command_argv, command);
       __FREE(command_argv);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);

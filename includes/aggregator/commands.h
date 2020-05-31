@@ -10,19 +10,19 @@
   void execute_list_countries(void);
 
   int validate_disease_frequency(int, char**);
-  void aggregate_disease_frequency(int, char**);
+  void aggregate_disease_frequency(int, char**, char*);
 
   int validate_topk_age_ranges(int, char**);
-  void aggregate_topk_age_ranges(void);
+  void aggregate_topk_age_ranges(int, char**, char*);
 
   int validate_search_patient_record(int, char**);
   void aggregate_search_patient_record(char*);
 
   int validate_num_patient_admissions(int, char**);
-  void aggregate_num_patient_admissions(void);
+  void aggregate_num_patient_admissions(int, char**, char*);
 
   int validate_num_patient_discharges(int, char**);
-  void aggregate_num_patient_discharges(void);
+  void aggregate_num_patient_discharges(int, char**, char*);
 
   int validate_exit(int, char**);
   void execute_exit(void);

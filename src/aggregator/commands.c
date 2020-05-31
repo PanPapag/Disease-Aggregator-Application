@@ -5,7 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <sys/select.h>
 #include <sys/types.h>
 
 #include "../../includes/common/hash_table.h"
@@ -80,9 +79,35 @@ int validate_disease_frequency(int argc, char** argv) {
   return VALID_COMMAND;
 }
 
-void aggregate_disease_frequency(int argc, char** argv) {
-  printf("good\n");
-  return;
+
+void aggregate_disease_frequency(int argc, char** argv, char* command) {
+  /*
+    If country specified send the command only to the worker who is handling the
+    correspoding country directory.
+    Otherwise, push the command to every worker
+  */
+  int total_disease_cases = 0;
+  if (argc == 4) {
+    void* result = hash_table_find(country_to_pid_ht, argv[argc-1]);
+    if (result != NULL) {
+      pid_t worker_pid = (*(pid_t*) result);
+      int pos = get_worker_fds_pos(worker_pid);
+      write_in_chunks(parameters.workers_fd_1[pos], command, parameters.buffer_size);
+      char* result = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
+      if (strcmp(result, NO_RESPONSE)) {
+        total_disease_cases += atoi(result);
+      }
+    }
+  } else {
+    for (size_t i = 0U; i < parameters.num_workers; ++i) {
+      write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
+      char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+      if (strcmp(result, NO_RESPONSE)) {
+        total_disease_cases += atoi(result);
+      }
+    }
+  }
+  printf("%d\n", total_disease_cases);
 }
 
 int validate_topk_age_ranges(int argc, char** argv) {
@@ -119,30 +144,11 @@ int validate_search_patient_record(int argc, char** argv) {
 }
 
 void aggregate_search_patient_record(char* command) {
-  fd_set rfds;
-  FD_ZERO(&rfds);
   for (size_t i = 0U; i < parameters.num_workers; ++i) {
     write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
-    FD_SET(parameters.workers_fd_2[i], &rfds);
-  }
-  int counter = 0;
-  int stop = 0;
-  while (!stop) {
-    int retval = select(FD_SETSIZE, &rfds, NULL, NULL, NULL);
-    if (retval == -1) {
-      perror("select()");
-    } else if (retval) {
-      for (size_t i = 0U; i < parameters.num_workers; ++i) {
-        if (FD_ISSET(parameters.workers_fd_2[i], &rfds)) {
-          char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
-          if (strcmp(result, NO_RESPONSE)) {
-            printf("%s\n", result);
-          }
-          if (++counter == parameters.num_workers) {
-            stop = 1;
-          }
-        }
-      }
+    char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+    if (strcmp(result, NO_RESPONSE)) {
+      printf("%s\n", result);
     }
   }
 }
@@ -190,6 +196,36 @@ int validate_num_patient_admissions(int argc, char** argv) {
   return VALID_COMMAND;
 }
 
+void aggregate_num_patient_admissions(int argc, char** argv, char* command) {
+  /*
+    If country specified send the command only to the worker who is handling the
+    correspoding country directory.
+    Otherwise, push the command to every worker
+  */
+  int total_disease_cases = 0;
+  if (argc == 4) {
+    void* result = hash_table_find(country_to_pid_ht, argv[argc-1]);
+    if (result != NULL) {
+      pid_t worker_pid = (*(pid_t*) result);
+      int pos = get_worker_fds_pos(worker_pid);
+      write_in_chunks(parameters.workers_fd_1[pos], command, parameters.buffer_size);
+      char* result = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
+      if (strcmp(result, NO_RESPONSE)) {
+        total_disease_cases += atoi(result);
+      }
+    }
+  } else {
+    for (size_t i = 0U; i < parameters.num_workers; ++i) {
+      write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
+      char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+      if (strcmp(result, NO_RESPONSE)) {
+        total_disease_cases += atoi(result);
+      }
+    }
+  }
+  printf("%d\n", total_disease_cases);
+}
+
 int validate_num_patient_discharges(int argc, char** argv) {
   if (argc != 4 && argc != 5) {
     return INVALID_COMMAND;
@@ -231,6 +267,36 @@ int validate_num_patient_discharges(int argc, char** argv) {
     }
   }
   return VALID_COMMAND;
+}
+
+void aggregate_num_patient_discharges(int argc, char** argv, char* command) {
+  /*
+    If country specified send the command only to the worker who is handling the
+    correspoding country directory.
+    Otherwise, push the command to every worker
+  */
+  int total_disease_cases = 0;
+  if (argc == 4) {
+    void* result = hash_table_find(country_to_pid_ht, argv[argc-1]);
+    if (result != NULL) {
+      pid_t worker_pid = (*(pid_t*) result);
+      int pos = get_worker_fds_pos(worker_pid);
+      write_in_chunks(parameters.workers_fd_1[pos], command, parameters.buffer_size);
+      char* result = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
+      if (strcmp(result, NO_RESPONSE)) {
+        total_disease_cases += atoi(result);
+      }
+    }
+  } else {
+    for (size_t i = 0U; i < parameters.num_workers; ++i) {
+      write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
+      char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+      if (strcmp(result, NO_RESPONSE)) {
+        total_disease_cases += atoi(result);
+      }
+    }
+  }
+  printf("%d\n", total_disease_cases);
 }
 
 int validate_exit(int argc, char** argv) {

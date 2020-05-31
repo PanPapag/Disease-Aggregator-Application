@@ -13,11 +13,11 @@
     };
 
 
-  void execute_disease_frequency(char**);
+  void execute_disease_frequency(int, char**);
 
-  void execute_num_patients_admissions(char**);
+  void execute_num_patients_admissions(int, char**);
 
-  void execute_num_patients_discharges(char**);
+  void execute_num_patients_discharges(int, char**);
 
   void execute_search_patient_record(char**);
 

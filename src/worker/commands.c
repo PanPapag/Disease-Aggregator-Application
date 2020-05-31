@@ -80,15 +80,21 @@ int __num_patients_between(avl_ptr disease_avl,
   return counter;
 }
 
-void execute_disease_frequency(char** argv) {
+void execute_disease_frequency(int argc, char** argv) {
   void* result = hash_table_find(disease_ht, argv[0]);
   if (result == NULL) {
-    report_warning("There is no disease recorded with Disease ID: <%s>", argv[0]);
+    write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
   } else {
-    /* Cast result to avl pointer */
     avl_ptr disease_avl = (avl_ptr) result;
-    /* Print total number of patients for given country in the given date range */
-    printf("%d\n", __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], NULL));
+    int num_patients;
+    if (argc == 3){
+      num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], NULL);
+    } else {
+      num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], argv[3]);
+    }
+    char num_patients_buffer[12];
+    sprintf(num_patients_buffer, "%d", num_patients);
+    write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
   }
 }
 
@@ -103,29 +109,39 @@ void execute_search_patient_record(char** argv) {
   }
 }
 
-void execute_num_patients_admissions(char** argv) {
-  /* Get for the current disease its AVL tree */
+void execute_num_patients_admissions(int argc, char** argv) {
   void* result = hash_table_find(disease_ht, argv[0]);
   if (result == NULL) {
-    report_warning("There is no disease recorded with Disease ID: <%s>", argv[0]);
+    write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
   } else {
-    /* Cast result to avl pointer */
     avl_ptr disease_avl = (avl_ptr) result;
-    /* Print total number of patients in the given date range */
-    printf("%d\n", __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], NULL));
+    int num_patients;
+    if (argc == 3){
+      num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], NULL);
+    } else {
+      num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], argv[3]);
+    }
+    char num_patients_buffer[12];
+    sprintf(num_patients_buffer, "%d", num_patients);
+    write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
   }
 }
 
-void execute_num_patients_discharges(char** argv) {
-  /* Get for the current disease its AVL tree */
+void execute_num_patients_discharges(int argc, char** argv) {
   void* result = hash_table_find(disease_ht, argv[0]);
   if (result == NULL) {
-    report_warning("There is no disease recorded with Disease ID: <%s>", argv[0]);
+    write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
   } else {
-    /* Cast result to avl pointer */
     avl_ptr disease_avl = (avl_ptr) result;
-    /* Print total number of patients in the given date range */
-    printf("%d\n", __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], NULL));
+    int num_patients;
+    if (argc == 3){
+      num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], NULL);
+    } else {
+      num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], argv[3]);
+    }
+    char num_patients_buffer[12];
+    sprintf(num_patients_buffer, "%d", num_patients);
+    write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
   }
 }
 

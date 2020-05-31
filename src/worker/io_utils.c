@@ -112,18 +112,26 @@ void __handle_command(char* command) {
   command_no_tokens = p.we_wordc;
   /* Call correspoding command function */
   if (!strcmp(command_tokens[0], "/diseaseFrequency")) {
-    printf("%s %ld\n", command_tokens[0], (long)getpid());
+    command_argv = prune_command_name(command_tokens, command_no_tokens);
+    command_argc = command_no_tokens - 1;
+    execute_disease_frequency(command_argc, command_argv);
+    __FREE(command_argv);
   } else if (!strcmp(command_tokens[0], "/topk-AgeRanges")) {
     printf("%s %ld\n", command_tokens[0], (long)getpid());
   } else if (!strcmp(command_tokens[0], "/searchPatientRecord")) {
     command_argv = prune_command_name(command_tokens, command_no_tokens);
-    command_argc = command_no_tokens - 1;
     execute_search_patient_record(command_argv);
     __FREE(command_argv);
   } else if (!strcmp(command_tokens[0], "/numPatientAdmissions")) {
-    printf("%s %ld\n", command_tokens[0], (long)getpid());
+    command_argv = prune_command_name(command_tokens, command_no_tokens);
+    command_argc = command_no_tokens - 1;
+    execute_num_patients_admissions(command_argc, command_argv);
+    __FREE(command_argv);
   } else if (!strcmp(command_tokens[0], "/numPatientDischarges")) {
-    printf("%s %ld\n", command_tokens[0], (long)getpid());
+    command_argv = prune_command_name(command_tokens, command_no_tokens);
+    command_argc = command_no_tokens - 1;
+    execute_num_patients_discharges(command_argc, command_argv);
+    __FREE(command_argv);
   } else if (!strcmp(command_tokens[0], "/exit")) {
     printf("%s %ld\n", command_tokens[0], (long)getpid());
   }
