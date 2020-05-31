@@ -126,8 +126,9 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
       }
       /* Read from the pipe the files statistics */
-      // num_workers = 3 => 50 files per worker, that can be sent via pipe (at first)
-      for (size_t j = 0; j < 50; ++j) {
+      char* num_files_buffer = read_in_chunks(workers_fd_2[i], parameters.buffer_size);
+      int num_files = atoi(num_files_buffer);
+      for (size_t j = 0; j < num_files; ++j) {
         char* serialized_statistics_entry = read_in_chunks(workers_fd_2[i], parameters.buffer_size);
         serialized_statistics_entry_print(serialized_statistics_entry);
         __FREE(serialized_statistics_entry);

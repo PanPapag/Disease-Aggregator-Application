@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -16,12 +17,12 @@ void write_in_chunks(int fd, char* msg, size_t buffer_size) {
   // 2. Write the message
   char buffer[buffer_size];
   size_t msg_length = strlen(msg);
+  assert(buffer_size > 1);
   ssize_t total_bytes = msg_length + (msg_length / (buffer_size - 1)) + 1;
   write(fd, &total_bytes, sizeof(ssize_t));
   write(fd, &msg_length, sizeof(size_t));
   ssize_t bytes_written = 0;
   int counter = 0;
-  // printf("%d %zd %ld %s\n", fd, total_bytes, msg_length, msg);
   while (bytes_written < total_bytes) {
     size_t i;
     for (i = 0; i < buffer_size - 1; ++i) {

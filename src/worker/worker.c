@@ -80,6 +80,9 @@ int main(int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   }
   /* Write to the pipe the files statistics */
+  char num_files_buffer[12];
+  sprintf(num_files_buffer, "%ld", list_size(files_statistics));
+  write_in_chunks(parameters.write_fd, num_files_buffer, parameters.buffer_size);
   for (size_t i = 1U; i <= list_size(files_statistics); ++i) {
     list_node_ptr list_node = list_get(files_statistics, i);
     char* serialized_statistics_entry = ptr_to_statistics_entry_serialize(list_node->data_);

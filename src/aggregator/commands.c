@@ -139,6 +139,23 @@ int validate_topk_age_ranges(int argc, char** argv) {
   }
 }
 
+void aggregate_topk_age_ranges(char** argv, char* command) {
+  int k = atoi(argv[0]);
+  char* country_name = argv[1];
+  void* result = hash_table_find(country_to_pid_ht, country_name);
+  if (result != NULL) {
+    pid_t worker_pid = (*(pid_t*) result);
+    int pos = get_worker_fds_pos(worker_pid);
+    write_in_chunks(parameters.workers_fd_1[pos], command, parameters.buffer_size);
+    for (size_t i = 0U; i < k; ++i) {
+      char* result = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
+      if (strcmp(result, NO_RESPONSE)) {
+        printf("%s\n", result);
+      }
+    }
+  }
+}
+
 int validate_search_patient_record(int argc, char** argv) {
   return argc == 2 ? VALID_COMMAND : INVALID_COMMAND;
 }

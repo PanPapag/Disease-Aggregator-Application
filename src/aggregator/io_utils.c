@@ -106,9 +106,7 @@ void __handle_command(char command[]) {
   } else if (!strcmp(command_tokens[0], "/topk-AgeRanges")) {
     if (validate_topk_age_ranges(command_no_tokens, command_tokens)) {
       command_argv = prune_command_name(command_tokens, command_no_tokens);
-      command_argc = command_no_tokens - 1;
-      printf("TOPK-AGE_RANGES CORRECT\n");
-      // execute_disease_frequency(command_argc, command_argv);
+      aggregate_topk_age_ranges(command_argv, command);
       __FREE(command_argv);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
@@ -146,9 +144,7 @@ void __handle_command(char command[]) {
     }
   } else if (!strcmp(command_tokens[0], "/exit")) {
     if (validate_exit(command_no_tokens, command_tokens)) {
-      /* Free wordexp object */
       wordfree(&p);
-      /* Exit the program */
       printf("EXIT CORRECT\n");
       // execute_exit();
     } else {

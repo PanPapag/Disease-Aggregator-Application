@@ -117,7 +117,8 @@ void __handle_command(char* command) {
     execute_disease_frequency(command_argc, command_argv);
     __FREE(command_argv);
   } else if (!strcmp(command_tokens[0], "/topk-AgeRanges")) {
-    printf("%s %ld\n", command_tokens[0], (long)getpid());
+    command_argv = prune_command_name(command_tokens, command_no_tokens);
+    execute_topk_age_ranges(command_argv);
   } else if (!strcmp(command_tokens[0], "/searchPatientRecord")) {
     command_argv = prune_command_name(command_tokens, command_no_tokens);
     execute_search_patient_record(command_argv);

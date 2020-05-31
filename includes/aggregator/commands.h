@@ -13,7 +13,7 @@
   void aggregate_disease_frequency(int, char**, char*);
 
   int validate_topk_age_ranges(int, char**);
-  void aggregate_topk_age_ranges(int, char**, char*);
+  void aggregate_topk_age_ranges(char**, char*);
 
   int validate_search_patient_record(int, char**);
   void aggregate_search_patient_record(char*);

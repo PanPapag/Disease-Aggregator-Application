@@ -18,6 +18,8 @@
 
   void execute_num_patients_discharges(int, char**);
 
+  void execute_topk_age_ranges(char**);
+
   void execute_search_patient_record(char**);
 
   void execute_exit(void);
