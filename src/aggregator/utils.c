@@ -17,6 +17,8 @@
 hash_table_ptr country_to_pid_ht;
 list_ptr countries_names;
 
+program_parameters_t parameters;
+
 list_ptr get_all_subdirs(char* parent_dir) {
   list_ptr result = list_create(STRING*, ptr_to_string_compare,
                                 ptr_to_string_print, ptr_to_string_destroy);
@@ -104,4 +106,13 @@ void update_country_to_pid_ht(char* worker_dir_paths, pid_t worker_pid) {
     list_sorted_insert(&countries_names, &ptr_to_country_name);
     worker_dir_path = strtok(NULL, SPACE);
   }
+}
+
+int get_worker_fds_pos(pid_t pid) {
+  for (int i = 0; i < parameters.num_workers; ++i) {
+    if (parameters.workers_pid[i] == pid) {
+      return i;
+    }
+  }
+  return -1;
 }

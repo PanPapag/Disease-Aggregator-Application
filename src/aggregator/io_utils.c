@@ -12,6 +12,7 @@
 #include "../../includes/common/utils.h"
 #include "../../includes/aggregator/commands.h"
 #include "../../includes/aggregator/io_utils.h"
+#include "../../includes/aggregator/utils.h"
 
 program_parameters_t parameters;
 
@@ -109,7 +110,7 @@ void handle_command(char command[]) {
       command_argv = prune_command_name(command_tokens, command_no_tokens);
       command_argc = command_no_tokens - 1;
       printf("DISEASE FREQUENCY CORRECT\n");
-      // execute_disease_frequency(command_argc, command_argv);
+      // aggregate_disease_frequency(command_argc, command_argv);
       __FREE(command_argv);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);

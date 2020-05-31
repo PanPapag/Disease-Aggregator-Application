@@ -81,10 +81,14 @@ int main(int argc, char* argv[]) {
       Each child proccess communicates with the parent via two file descriptors,
       one for writing and one for reading.
     */
-    char workers_fifo_1[parameters.num_workers][15];
-    char workers_fifo_2[parameters.num_workers][15];
+    char workers_fifo_1[parameters.num_workers][FIFO_NAME_SIZE];
+    char workers_fifo_2[parameters.num_workers][FIFO_NAME_SIZE];
     int workers_fd_1[parameters.num_workers];
     int workers_fd_2[parameters.num_workers];
+    /* Store workers fds for writing and reading to program_parameters */
+    parameters.workers_pid = (pid_t*) malloc(parameters.num_workers * sizeof(pid_t));
+    parameters.workers_fd_1 = (int*) malloc(parameters.num_workers * sizeof(int));
+    parameters.workers_fd_2 = (int*) malloc(parameters.num_workers * sizeof(int));
     /* Get a list of all subdirectories included in the input directory */
     list_ptr subdirs = get_all_subdirs(parameters.input_dir);
     /* Distribute sub directories to each worker */
@@ -92,6 +96,8 @@ int main(int argc, char* argv[]) {
     /* Distribute directories paths and reconstruct named pipes to communicate */
     for (size_t i = 0; i < parameters.num_workers; ++i) {
       // TODO If no directories given in this worker, kill him
+      /* Store worker pid to program_parameters */
+      parameters.workers_pid[i] = workers_pid[i];
       /* Update for the current worker country_to_pid_ht */
       update_country_to_pid_ht(worker_dir_paths[i], workers_pid[i]);
       /* Reconstruct named pipes given the children proccesses ids */
@@ -102,6 +108,7 @@ int main(int argc, char* argv[]) {
         distributing the application commands given from stdin
       */
       workers_fd_1[i] = open(workers_fifo_1[i], O_WRONLY);
+      parameters.workers_fd_1[i] = workers_fd_1[i];
       if (workers_fd_1[i] < 0) {
         report_error("<diseaseAggregator> could not open named pipe: %s", workers_fifo_1[i]);
         exit(EXIT_FAILURE);
@@ -113,6 +120,7 @@ int main(int argc, char* argv[]) {
         from the commands sent to workers
       */
       workers_fd_2[i] = open(workers_fifo_2[i], O_RDONLY);
+      parameters.workers_fd_2[i] = workers_fd_2[i];
       if (workers_fd_2[i] < 0) {
         report_error("<diseaseAggregator> could not open named pipe: %s", workers_fifo_2[i]);
         exit(EXIT_FAILURE);
@@ -127,6 +135,7 @@ int main(int argc, char* argv[]) {
       /* Close file descriptors and clear memory */
       __FREE(worker_dir_paths[i]);
     }
+    __FREE(worker_dir_paths);
     /* Execute the app until command exit is given */
     main_loop();
     /* Close file descriptors and delete named pipes */
@@ -137,7 +146,9 @@ int main(int argc, char* argv[]) {
       unlink(workers_fifo_2[i]);
     }
     /* Clear memory */
-    __FREE(worker_dir_paths);
+    free(parameters.workers_fd_1);
+    free(parameters.workers_fd_2);
+    free(parameters.workers_pid);
     list_clear(subdirs);
     list_clear(countries_names);
     hash_table_clear(country_to_pid_ht);

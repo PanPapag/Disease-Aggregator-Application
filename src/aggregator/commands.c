@@ -13,9 +13,12 @@
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/aggregator/commands.h"
+#include "../../includes/aggregator/utils.h"
 
 hash_table_ptr country_to_pid_ht;
 list_ptr countries_names;
+
+program_parameters_t parameters;
 
 int validate_list_countries(int argc, char** argv) {
   return argc == 1 ? VALID_COMMAND : INVALID_COMMAND;
@@ -74,6 +77,11 @@ int validate_disease_frequency(int argc, char** argv) {
     }
   }
   return VALID_COMMAND;
+}
+
+void aggregate_disease_frequency(int argc, char** argv) {
+  printf("good\n");
+  return;
 }
 
 int validate_topk_age_ranges(int argc, char** argv) {
