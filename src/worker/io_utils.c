@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <wordexp.h>
 
 #include <sys/types.h>
@@ -96,4 +97,43 @@ hash_table_ptr parse_file_and_update_structures(const char* dir_name,
   fclose(fp);
   /* return age_groups_ht of the file that just being parsed */
   return age_groups_ht;
+}
+
+static inline
+void __handle_command(char* command) {
+  wordexp_t p;
+  char** command_tokens;
+  int command_no_tokens;
+  char** command_argv;
+  int command_argc;
+  /* Use API POSIX to extract arguments */
+  wordexp(command, &p, 0);
+  command_tokens = p.we_wordv;
+  command_no_tokens = p.we_wordc;
+  /* Call correspoding command function */
+  if (!strcmp(command_tokens[0], "/diseaseFrequency")) {
+    printf("%s %ld\n", command_tokens[0], (long)getpid());
+  } else if (!strcmp(command_tokens[0], "/topk-AgeRanges")) {
+    printf("%s %ld\n", command_tokens[0], (long)getpid());
+  } else if (!strcmp(command_tokens[0], "/searchPatientRecord")) {
+    command_argv = prune_command_name(command_tokens, command_no_tokens);
+    command_argc = command_no_tokens - 1;
+    execute_search_patient_record(command_argv);
+    __FREE(command_argv);
+  } else if (!strcmp(command_tokens[0], "/numPatientAdmissions")) {
+    printf("%s %ld\n", command_tokens[0], (long)getpid());
+  } else if (!strcmp(command_tokens[0], "/numPatientDischarges")) {
+    printf("%s %ld\n", command_tokens[0], (long)getpid());
+  } else if (!strcmp(command_tokens[0], "/exit")) {
+    printf("%s %ld\n", command_tokens[0], (long)getpid());
+  }
+  /* Free wordexp object */
+  wordfree(&p);
+}
+
+void worker_main_loop(void) {
+  while (1) {
+    char* command = read_in_chunks(parameters.read_fd, parameters.buffer_size);
+    __handle_command(command);
+  }
 }

@@ -16,8 +16,8 @@
 #include "../../includes/common/utils.h"
 #include "../../includes/worker/avl.h"
 #include "../../includes/worker/commands.h"
-#include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
+#include "../../includes/worker/patient_record.h"
 
 extern hash_table_ptr country_ht;
 extern hash_table_ptr disease_ht;
@@ -27,11 +27,13 @@ extern list_ptr countries_names;
 extern list_ptr diseases_names;
 extern list_ptr files_statistics;
 
+worker_parameters_t parameters;
+
 int main(int argc, char* argv[]) {
   // /* Extract command line arguments */
   char* read_fifo = argv[1];
   char* write_fifo = argv[2];
-  size_t buffer_size = atoi(argv[3]);
+  parameters.buffer_size = atoi(argv[3]);
   /* patient_record_ht: record id --> pointer to patient record structure */
   patient_record_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
                                         string_hash, string_compare,
@@ -58,13 +60,13 @@ int main(int argc, char* argv[]) {
                                  ptr_to_statistics_entry_destroy);
 
   /* Open named pipe to read the directories paths as well as the application commands */
-  int read_fd = open(read_fifo, O_RDONLY);
-  if (read_fd < 0) {
+  parameters.read_fd = open(read_fifo, O_RDONLY);
+  if (parameters.read_fd < 0) {
     report_error("<%s> could not open named pipe: %s", argv[0], read_fifo);
     exit(EXIT_FAILURE);
   }
   /* Read from the pipe the directories paths and parse them */
-  char* dir_paths = read_in_chunks(read_fd, buffer_size);
+  char* dir_paths = read_in_chunks(parameters.read_fd, parameters.buffer_size);
   char* dir_path = strtok(dir_paths, SPACE);
 	while (dir_path != NULL) {
     parse_directory(dir_path);
@@ -72,8 +74,8 @@ int main(int argc, char* argv[]) {
 	}
 
   /* Open named pipe to write the statistics as well as the results from the commands */
-  int write_fd = open(write_fifo, O_WRONLY);
-  if (write_fd < 0) {
+  parameters.write_fd = open(write_fifo, O_WRONLY);
+  if (parameters.write_fd < 0) {
     report_error("<%s> could not open named pipe: %s", argv[0], write_fifo);
     exit(EXIT_FAILURE);
   }
@@ -81,13 +83,16 @@ int main(int argc, char* argv[]) {
   for (size_t i = 1U; i <= list_size(files_statistics); ++i) {
     list_node_ptr list_node = list_get(files_statistics, i);
     char* serialized_statistics_entry = ptr_to_statistics_entry_serialize(list_node->data_);
-    write_in_chunks(write_fd, serialized_statistics_entry, buffer_size);
+    write_in_chunks(parameters.write_fd, serialized_statistics_entry, parameters.buffer_size);
     free(serialized_statistics_entry);
   }
 
+  /* Reading commands from parent process and writing the results back to him */
+  worker_main_loop();
+
   /* Close file descriptors */
-  close(write_fd);
-  close(read_fd);
+  close(parameters.write_fd);
+  close(parameters.read_fd);
   /* Clear memory */
   free(dir_paths);
   execute_exit();
@@ -107,13 +112,6 @@ int main(int argc, char* argv[]) {
   // char* ar[1];
   // ar[0] = "2107";
   // execute_search_patient_record(ar);
-
-  // hash_table_print(patient_record_ht, stdout);
-  // hash_table_print(disease_ht, stdout);
-  // list_print(diseases_names, stdout);
-  // list_print(countries_names, stdout);
-
-
 
   return EXIT_SUCCESS;
 }

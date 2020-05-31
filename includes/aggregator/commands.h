@@ -16,7 +16,7 @@
   void aggregate_topk_age_ranges(void);
 
   int validate_search_patient_record(int, char**);
-  void aggregate_search_patient_record(void);
+  void aggregate_search_patient_record(char*);
 
   int validate_num_patient_admissions(int, char**);
   void aggregate_num_patient_admissions(void);

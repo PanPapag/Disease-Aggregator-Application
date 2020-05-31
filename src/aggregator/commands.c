@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/select.h>
 #include <sys/types.h>
 
 #include "../../includes/common/hash_table.h"
@@ -115,6 +116,28 @@ int validate_topk_age_ranges(int argc, char** argv) {
 
 int validate_search_patient_record(int argc, char** argv) {
   return argc == 2 ? VALID_COMMAND : INVALID_COMMAND;
+}
+
+void aggregate_search_patient_record(char* command) {
+  fd_set rfds;
+  // FD_ZERO(&rfds);
+  for (size_t i = 0U; i < parameters.num_workers; ++i) {
+    write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
+    // FD_SET(parameters.workers_fd_2[i], &rfds);
+    char* result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+    if (strcmp(result, NO_RESPONSE)) {
+      printf("%s\n", result);
+    }
+  }
+  // int retval = select(parameters.num_workers, &rfds, NULL, NULL, NULL);
+  // if (retval == -1) {
+  //   perror("select()");
+  // } else if (retval) {
+  //   char* result = read_in_chunks(retval, parameters.buffer_size);
+  //   if (strcmp(result, NO_RESPONSE)) {
+  //     printf("%s\n", result);
+  //   }
+  // }
 }
 
 int validate_num_patient_admissions(int argc, char** argv) {

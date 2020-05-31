@@ -20,5 +20,7 @@
   #define NO_BUCKETS 20
 
   #define BUCKET_SIZE 64
-  
+
+  #define NO_RESPONSE "-1"
+
 #endif

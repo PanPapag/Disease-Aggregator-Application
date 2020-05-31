@@ -9,8 +9,8 @@
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
-#include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/io_utils.h"
+#include "../../includes/worker/patient_record.h"
 
 patient_record_ptr patient_record_create(char** file_entry_tokens,
                                          const char* entry_date,
@@ -76,7 +76,7 @@ void patient_record_print(void* v, FILE* out) {
   fprintf(out, "Patient First Name: %s\n", patient_record->patient_first_name);
   fprintf(out, "Patient Last Name: %s\n", patient_record->patient_last_name);
   fprintf(out, "Disease ID: %s\n", patient_record->disease_id);
-  fprintf(out, "Age: %" PRIu8 "\n", patient_record->age);
+  fprintf(out, "Country: %s\n", patient_record->country);
   strftime(entry_date_buffer, sizeof(entry_date_buffer), "%d-%m-%Y", &patient_record->entry_date);
   fprintf(out, "Entry Date: %s\n", entry_date_buffer);
   strftime(exit_date_buffer, sizeof(exit_date_buffer), "%d-%m-%Y", &patient_record->exit_date);
@@ -86,6 +86,34 @@ void patient_record_print(void* v, FILE* out) {
     fprintf(out, "Exit Date: %s\n", exit_date_buffer);
   }
   printf("\n");
+}
+
+char* patient_record_stringify(void* v) {
+  patient_record_ptr patient_record = (patient_record_ptr) v;
+  char entry_date_buffer[MAX_BUFFER_SIZE];
+  strftime(entry_date_buffer, sizeof(entry_date_buffer), "%d-%m-%Y", &patient_record->entry_date);
+  char exit_date_buffer[MAX_BUFFER_SIZE];
+  strftime(exit_date_buffer, sizeof(exit_date_buffer), "%d-%m-%Y", &patient_record->exit_date);
+  char buffer[MAX_BUFFER_SIZE];
+  if (!strcmp(exit_date_buffer, EXIT_DATE_NOT_SPECIFIED)) {
+    sprintf(buffer, "%s %s %s %s %" PRIu8 " %s -", patient_record->record_id,
+                                                   patient_record->patient_first_name,
+                                                   patient_record->patient_last_name,
+                                                   patient_record->disease_id,
+                                                   patient_record->age,
+                                                   entry_date_buffer);
+  } else {
+    sprintf(buffer, "%s %s %s %s %" PRIu8 " %s %s", patient_record->record_id,
+                                                    patient_record->patient_first_name,
+                                                    patient_record->patient_last_name,
+                                                    patient_record->disease_id,
+                                                    patient_record->age,
+                                                    entry_date_buffer,
+                                                    exit_date_buffer);
+  }
+  char* result = (char*) malloc(strlen(buffer) + 1);
+  strcpy(result, buffer);
+  return result;
 }
 
 int64_t patient_record_compare(void* a, void* b) {

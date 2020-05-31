@@ -1,9 +1,10 @@
 #ifndef __WORKER_PATIENT_RECORD__
   #define __WORKER_PATIENT_RECORD__
 
-  #include <time.h>
-
   #include <stdint.h>
+
+  #define __USE_XOPEN
+  #include <time.h>
 
   #define NO_PATIENT_RECORD_TOKENS 8
   #define PATIENT_RECORD_DELIMITER " "
@@ -43,6 +44,8 @@
   patient_record_ptr patient_record_create(char**, const char*, const char*);
   /* Utility function to print a patient record struct */
   void patient_record_print(void*, FILE*);
+  /* Utility function which converts a patient record to a string */
+  char* patient_record_stringify(void*);
   /* Utility function to compare two patient record structs */
   int64_t patient_record_compare(void*, void*);
   /* Utility function to delete an allocated patient record struct */

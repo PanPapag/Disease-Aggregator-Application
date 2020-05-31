@@ -23,6 +23,8 @@ list_ptr countries_names;
 list_ptr diseases_names;
 list_ptr files_statistics;
 
+worker_parameters_t parameters;
+
 static inline
 void __count_patients_between(avl_node_ptr current_root,
                              struct tm (*cmp_field)(patient_record_ptr),
@@ -93,9 +95,11 @@ void execute_disease_frequency(char** argv) {
 void execute_search_patient_record(char** argv) {
   void* result = hash_table_find(patient_record_ht, argv[0]);
   if (result == NULL) {
-    report_warning("There is no patient record with Record ID: <%s>", argv[0]);
+    write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
   } else {
-    patient_record_print(result, stdout);
+    char* stringified_patient_record = patient_record_stringify(result);
+    write_in_chunks(parameters.write_fd, stringified_patient_record, parameters.buffer_size);
+    __FREE(stringified_patient_record);
   }
 }
 

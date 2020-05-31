@@ -8,11 +8,13 @@
    ERROR
  };
 
-  /**
-    Uncomment the line below if you with the enable extensively checking on
-    th records' format
-  */
-  #define PATIENT_RECORD_CHECKING
+  typedef struct worker_parameters {
+    size_t buffer_size;
+    int write_fd;
+    int read_fd;
+  } worker_parameters_t;
+
+  extern worker_parameters_t parameters;
 
   /**
     \brief Wrapper function which traverses all the files of a given country
@@ -26,5 +28,7 @@
     total number of cases per age group
   */
   hash_table_ptr parse_file_and_update_structures(const char*, const char*, const char*);
+  /* Reading commands from parent process and writing the results back to him */
+  void worker_main_loop(void);
 
 #endif

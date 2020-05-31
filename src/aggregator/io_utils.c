@@ -74,20 +74,8 @@ void parse_arguments(int* argc, char* argv[]) {
   }
 }
 
-void main_loop(void) {
-  char command[MAX_BUFFER_SIZE];
-  while (1) {
-    /* Read command from the stdin */
-    printf("> ");
-    memset(&command, 0, sizeof(command));
-    fgets(command, MAX_BUFFER_SIZE, stdin);
-    command[strlen(command) - 1] = '\0';
-    /* Handle command and call correspodent function until exit will be given */
-    handle_command(command);
-  }
-}
-
-void handle_command(char command[]) {
+static inline
+void __handle_command(char command[]) {
   wordexp_t p;
   char** command_tokens;
   int command_no_tokens;
@@ -131,8 +119,7 @@ void handle_command(char command[]) {
     if (validate_search_patient_record(command_no_tokens, command_tokens)) {
       command_argv = prune_command_name(command_tokens, command_no_tokens);
       command_argc = command_no_tokens - 1;
-      printf("SEARCH PATIENT RECORD CORRECT\n");
-      // execute_disease_frequency(command_argc, command_argv);
+      aggregate_search_patient_record(command);
       __FREE(command_argv);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
@@ -178,4 +165,17 @@ void handle_command(char command[]) {
   printf("\n");
   /* Free wordexp object */
   wordfree(&p);
+}
+
+void main_loop(void) {
+  char command[MAX_BUFFER_SIZE];
+  while (1) {
+    /* Read command from the stdin */
+    printf("> ");
+    memset(&command, 0, sizeof(command));
+    fgets(command, MAX_BUFFER_SIZE, stdin);
+    command[strlen(command) - 1] = '\0';
+    /* Handle command and call correspodent function until exit will be given */
+    __handle_command(command);
+  }
 }
