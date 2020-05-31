@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#include <sys/types.h>
 
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
@@ -61,12 +64,33 @@ int int_compare(void* a, void* b) {
 }
 
 void int_print(void* v, FILE* out) {
-	fprintf(out, "%d\n", (*(int *)v));
+	fprintf(out, "%d\n", (*(int*)v));
 }
 
 void int_destroy(void* v) {
   if (v != NULL) {
     int* i = (int*) v;
+    __FREE(i);
+  }
+}
+
+pid_t* pid_create(pid_t v) {
+	pid_t* p = malloc(sizeof(pid_t));
+	*p = v;
+	return p;
+}
+
+int pid_compare(void* a, void* b) {
+	return (*(pid_t*)a) - (*(pid_t*)b);
+}
+
+void pid_print(void* v, FILE* out) {
+	fprintf(out, "%d\n", (*(pid_t*)v));
+}
+
+void pid_destroy(void* v) {
+  if (v != NULL) {
+    pid_t* i = (pid_t*) v;
     __FREE(i);
   }
 }
@@ -78,6 +102,12 @@ size_t string_hash(void* value) {
     hash = (hash << 5) + hash + *s;
   }
   return hash;
+}
+
+char* string_create(char* v){
+  char* result = (char*) malloc((strlen(v) + 1) * sizeof(char));
+  strcpy(result, v);
+  return result;
 }
 
 void string_print(void* v, FILE* out) {
@@ -216,7 +246,7 @@ char** prune_command_name(char** src, size_t size) {
   return dest;
 }
 
-char* get_last_token(const char* str, char* del) {
-  char* last_token = strrchr(str, '/');
+char* get_last_token(const char* str, char del) {
+  char* last_token = strrchr(str, del);
   return last_token+1;
 }

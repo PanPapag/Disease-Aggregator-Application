@@ -14,8 +14,12 @@
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/statistics.h"
+#include "../../includes/common/utils.h"
 #include "../../includes/aggregator/io_utils.h"
 #include "../../includes/aggregator/utils.h"
+
+extern hash_table_ptr country_to_pid_ht;
+extern list_ptr countries_names;
 
 program_parameters_t parameters;
 
@@ -63,6 +67,17 @@ int main(int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   } else {
     /*
+      Initialize country_to_pid_ht. key: <country_name> -> value: <pid>
+      which parsed the given country directory
+    */
+    country_to_pid_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
+                                          string_hash, string_compare,
+                                          string_print, pid_print,
+                                          NULL, pid_destroy);
+    /* Initialize a list to store the names of all countries directories */
+    countries_names = list_create(STRING*, ptr_to_string_compare,
+                                  ptr_to_string_print, ptr_to_string_destroy);
+    /*
       Each child proccess communicates with the parent via two file descriptors,
       one for writing and one for reading.
     */
@@ -77,6 +92,8 @@ int main(int argc, char* argv[]) {
     /* Distribute directories paths and reconstruct named pipes to communicate */
     for (size_t i = 0; i < parameters.num_workers; ++i) {
       // TODO If no directories given in this worker, kill him
+      /* Update for the current worker country_to_pid_ht */
+      update_country_to_pid_ht(worker_dir_paths[i], workers_pid[i]);
       /* Reconstruct named pipes given the children proccesses ids */
       sprintf(workers_fifo_1[i], "pw_cr_%d", workers_pid[i]);
       sprintf(workers_fifo_2[i], "pr_cw_%d", workers_pid[i]);
@@ -122,6 +139,8 @@ int main(int argc, char* argv[]) {
     /* Clear memory */
     __FREE(worker_dir_paths);
     list_clear(subdirs);
+    list_clear(countries_names);
+    hash_table_clear(country_to_pid_ht);
   }
 
   return EXIT_SUCCESS;

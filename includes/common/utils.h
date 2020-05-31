@@ -13,7 +13,7 @@
   char* concat(int count, ...);
 
   /* Hash Function for unsigned integers */
-  size_t uint_create(void*);
+  size_t uint_hash(void*);
   /* Returns an integer in a new memory address with the given value */
   int* int_create(int);
   /* Prints a given int* */
@@ -23,8 +23,19 @@
   /* Free a pointer to int */
   void int_destroy(void*);
 
+  /* Returns a pid_t in a new memory address with the given value */
+  pid_t* pid_create(pid_t);
+  /* Prints a given int* */
+  void pid_print(void*, FILE* out);
+  /* Compares two given integers */
+  int pid_compare(void*, void*);
+  /* Free a pointer to int */
+  void pid_destroy(void*);
+
   /* Hash Function for strings */
   size_t string_hash(void*);
+  /* Returns a string in a new memory address with the given value */
+  char* string_create(char*);
   /* Prints the given string */
   void string_print(void*, FILE* out);
   /* Compares two given strings */
@@ -66,6 +77,6 @@
   char** prune_command_name(char**, size_t);
 
   /* Returns the last token given a string and a delimiter */
-  char* get_last_token(const char*, char*);
+  char* get_last_token(const char*, char);
 
 #endif

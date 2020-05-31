@@ -99,8 +99,7 @@ void handle_command(char command[]) {
   /* Call correspoding command function */
   if (!strcmp(command_tokens[0], "/listCountries")) {
     if (validate_list_countries(command_no_tokens, command_tokens)) {
-      // execute_list_countries();
-      printf("LIST COUNTRIES CORRECT\n");
+      execute_list_countries();
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
       fprintf(stderr, "Usage: /listCountries\n");

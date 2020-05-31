@@ -3,14 +3,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+#include <sys/types.h>
+
+#include "../../includes/common/hash_table.h"
 #include "../../includes/common/macros.h"
+#include "../../includes/common/list.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/aggregator/commands.h"
 
+hash_table_ptr country_to_pid_ht;
+list_ptr countries_names;
+
 int validate_list_countries(int argc, char** argv) {
   return argc == 1 ? VALID_COMMAND : INVALID_COMMAND;
+}
+
+void execute_list_countries(void) {
+  for (size_t i = 1U; i <= list_size(countries_names); ++i) {
+    list_node_ptr list_node = list_get(countries_names, i);
+    char* country = (*(char**) list_node->data_);
+    void* result = hash_table_find(country_to_pid_ht, country);
+    if (result != NULL) {
+      pid_t worker_pid = (*(pid_t*) result);
+      printf("%s %d\n",country, worker_pid);
+    }
+  }
 }
 
 int validate_disease_frequency(int argc, char** argv) {

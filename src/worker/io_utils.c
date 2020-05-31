@@ -29,7 +29,7 @@ void parse_directory(const char* dir_path) {
     report_error("Cannot open %s\n", dir_path);
   }
   else {
-    const char* dir_name = get_last_token(dir_path, "/");
+    const char* dir_name = get_last_token(dir_path, '/');
     while ((direntp = readdir(dir_ptr)) != NULL) {
       // Skip previous and current folder
       if (strcmp(direntp->d_name, ".") && strcmp(direntp->d_name, "..")) {

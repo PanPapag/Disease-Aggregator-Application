@@ -7,11 +7,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "../../includes/common/hash_table.h"
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/aggregator/utils.h"
+
+hash_table_ptr country_to_pid_ht;
+list_ptr countries_names;
 
 list_ptr get_all_subdirs(char* parent_dir) {
   list_ptr result = list_create(STRING*, ptr_to_string_compare,
@@ -84,4 +88,20 @@ char** distribute_subdirs(list_ptr directories, size_t num_workers) {
   }
 
   return result;
+}
+
+void update_country_to_pid_ht(char* worker_dir_paths, pid_t worker_pid) {
+  /* Copy to buffer so that dir_paths won't change while tokenized */
+  char buffer[MAX_BUFFER_SIZE];
+  strcpy(buffer, worker_dir_paths);
+  /* Extract countries names */
+  char* worker_dir_path = strtok(buffer, SPACE);
+  while (worker_dir_path != NULL) {
+    char* country_name = get_last_token(worker_dir_path, '/');
+    char* ptr_to_country_name = string_create(country_name);
+    pid_t* ptr_to_worker_pid = pid_create(worker_pid);
+    hash_table_insert(&country_to_pid_ht, ptr_to_country_name, ptr_to_worker_pid);
+    list_sorted_insert(&countries_names, &ptr_to_country_name);
+    worker_dir_path = strtok(NULL, SPACE);
+  }
 }
