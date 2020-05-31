@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
       }
       /* Read from the pipe the files statistics */
       // num_workers = 3 => 50 files per worker, that can be sent via pipe (at first)
-      for (size_t k = 0; k < 50; ++k) {
+      for (size_t j = 0; j < 50; ++j) {
         char* serialized_statistics_entry = read_in_chunks(workers_fd_2[i], parameters.buffer_size);
         serialized_statistics_entry_print(serialized_statistics_entry);
         __FREE(serialized_statistics_entry);
@@ -110,6 +110,9 @@ int main(int argc, char* argv[]) {
       /* Close file descriptors and clear memory */
       __FREE(worker_dir_paths[i]);
     }
+    /* Execute the app until command exit is given */
+    main_loop();
+    /* Close file descriptors and delete named pipes */
     for (size_t i = 0; i < parameters.num_workers; ++i) {
       close(workers_fd_1[i]);
       close(workers_fd_2[i]);
