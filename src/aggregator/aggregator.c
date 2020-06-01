@@ -42,14 +42,14 @@ int main(int argc, char* argv[]) {
     }
     if (pid == 0) {
       /* Create named pipe in which parent writes and child reads */
-      sprintf(fifo_1, "pw_cr_%d",getpid());
+      sprintf(fifo_1, "pw_cr_%d", getpid());
       ret_val = mkfifo(fifo_1, 0666);
       if ((ret_val == -1) && (errno != EEXIST)) {
          perror("Creating Fifo Failed");
          exit(1);
       }
       /* Create named pipe in which parent reads and child writes */
-      sprintf(fifo_2, "pr_cw_%d",getpid());
+      sprintf(fifo_2, "pr_cw_%d", getpid());
       ret_val = mkfifo(fifo_2, 0666);
       if ((ret_val == -1) && (errno != EEXIST)) {
          perror("Creating Fifo Failed");
@@ -133,27 +133,14 @@ int main(int argc, char* argv[]) {
         serialized_statistics_entry_print(serialized_statistics_entry);
         __FREE(serialized_statistics_entry);
       }
-      /* Close file descriptors and clear memory */
+      __FREE(num_files_buffer);
       __FREE(worker_dir_paths[i]);
     }
     __FREE(worker_dir_paths);
+    list_clear(subdirs);
     /* Execute the app until command exit is given */
     main_loop();
-    /* Close file descriptors and delete named pipes */
-    for (size_t i = 0; i < parameters.num_workers; ++i) {
-      close(workers_fd_1[i]);
-      close(workers_fd_2[i]);
-      unlink(workers_fifo_1[i]);
-      unlink(workers_fifo_2[i]);
-    }
-    /* Clear memory */
-    free(parameters.workers_fd_1);
-    free(parameters.workers_fd_2);
-    free(parameters.workers_pid);
-    list_clear(subdirs);
-    list_clear(countries_names);
-    hash_table_clear(country_to_pid_ht);
+    /* Everything handled correctly return success from parent */
+    return EXIT_SUCCESS;
   }
-
-  return EXIT_SUCCESS;
 }

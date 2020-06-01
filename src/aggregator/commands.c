@@ -97,6 +97,7 @@ void aggregate_disease_frequency(int argc, char** argv, char* command) {
       if (strcmp(result, NO_RESPONSE)) {
         total_disease_cases += atoi(result);
       }
+      __FREE(result);
     }
   } else {
     for (size_t i = 0U; i < parameters.num_workers; ++i) {
@@ -105,6 +106,7 @@ void aggregate_disease_frequency(int argc, char** argv, char* command) {
       if (strcmp(result, NO_RESPONSE)) {
         total_disease_cases += atoi(result);
       }
+      __FREE(result);
     }
   }
   printf("%d\n", total_disease_cases);
@@ -153,6 +155,7 @@ void aggregate_topk_age_ranges(char** argv, char* command) {
       if (strcmp(result, NO_RESPONSE)) {
         printf("%s\n", result);
       }
+      __FREE(result);
     }
   }
 }
@@ -168,6 +171,7 @@ void aggregate_search_patient_record(char* command) {
     if (strcmp(result, NO_RESPONSE)) {
       printf("%s\n", result);
     }
+    __FREE(result);
   }
 }
 
@@ -230,6 +234,7 @@ void aggregate_num_patient_admissions(int argc, char** argv, char* command) {
       if (strcmp(result, NO_RESPONSE)) {
         printf("%s %d\n", argv[argc-1], atoi(result));
       }
+      __FREE(result);
     }
   } else {
     for (size_t i = 0U; i < parameters.num_workers; ++i) {
@@ -241,7 +246,9 @@ void aggregate_num_patient_admissions(int argc, char** argv, char* command) {
         if (strcmp(result, NO_RESPONSE)) {
           printf("%s\n", result);
         }
+        __FREE(result);
       }
+      __FREE(num_reads_buffer);
     }
   }
 }
@@ -305,6 +312,7 @@ void aggregate_num_patient_discharges(int argc, char** argv, char* command) {
       if (strcmp(result, NO_RESPONSE)) {
         printf("%s %d\n", argv[argc-1], atoi(result));
       }
+      __FREE(result);
     }
   } else {
     for (size_t i = 0U; i < parameters.num_workers; ++i) {
@@ -316,6 +324,7 @@ void aggregate_num_patient_discharges(int argc, char** argv, char* command) {
         if (strcmp(result, NO_RESPONSE)) {
           printf("%s\n", result);
         }
+        __FREE(result);
       }
     }
   }
@@ -323,4 +332,24 @@ void aggregate_num_patient_discharges(int argc, char** argv, char* command) {
 
 int validate_exit(int argc, char** argv) {
   return argc == 1 ? VALID_COMMAND : INVALID_COMMAND;
+}
+
+void aggregate_exit(char* command) {
+  /* Close file descriptors and delete named pipes */
+  char fifo_1[parameters.num_workers][15], fifo_2[parameters.num_workers][15];
+  for (size_t i = 0U; i < parameters.num_workers; ++i) {
+    close(parameters.workers_fd_1[i]);
+    close(parameters.workers_fd_1[i]);
+    sprintf(fifo_1[i], "pw_cr_%d", parameters.workers_pid[i]);
+    sprintf(fifo_2[i], "pr_cw_%d", parameters.workers_pid[i]);
+    unlink(fifo_1[i]);
+    unlink(fifo_2[i]);
+  }
+  /* Clear memory */
+  free(parameters.workers_fd_1);
+  free(parameters.workers_fd_2);
+  free(parameters.workers_pid);
+  list_clear(countries_names);
+  hash_table_clear(country_to_pid_ht);
+  exit(EXIT_SUCCESS);
 }

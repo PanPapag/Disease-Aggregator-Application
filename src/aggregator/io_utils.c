@@ -145,8 +145,7 @@ void __handle_command(char command[]) {
   } else if (!strcmp(command_tokens[0], "/exit")) {
     if (validate_exit(command_no_tokens, command_tokens)) {
       wordfree(&p);
-      printf("EXIT CORRECT\n");
-      // execute_exit();
+      aggregate_exit(command);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
       fprintf(stderr, "Usage: /exit\n");

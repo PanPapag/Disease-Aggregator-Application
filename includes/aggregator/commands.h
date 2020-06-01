@@ -25,6 +25,6 @@
   void aggregate_num_patient_discharges(int, char**, char*);
 
   int validate_exit(int, char**);
-  void execute_exit(void);
+  void aggregate_exit(char*);
 
 #endif
