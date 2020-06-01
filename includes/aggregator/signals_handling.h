@@ -3,8 +3,8 @@
 
   #include <setjmp.h>
   #include <signal.h>
-
-  extern jmp_buf jmp_exit;
+  
+  extern volatile sig_atomic_t interrupt;
 
   void register_signals_handlers(void);
 

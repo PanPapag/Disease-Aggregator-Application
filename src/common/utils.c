@@ -7,8 +7,9 @@
 
 #include <sys/types.h>
 
-#include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
+#include "../../includes/common/list.h"
+#include "../../includes/common/macros.h"
 #include "../../includes/common/utils.h"
 
 uint8_t string_to_int64(char* value, int64_t* value_out) {
@@ -249,4 +250,21 @@ char** prune_command_name(char** src, size_t size) {
 char* get_last_token(const char* str, char del) {
   char* last_token = strrchr(str, del);
   return last_token+1;
+}
+
+void write_log_file(list_ptr countries_list) {
+  char log_file[15];
+  sprintf(log_file, "log_file.%d", getpid());
+  FILE* fp = fopen(log_file, "w");
+  if (fp == NULL) {
+    report_error("Unable to create file %s. Exiting...", log_file);
+    exit(EXIT_FAILURE);
+  }
+  for (size_t i = 1U; i <= list_size(countries_list); ++i) {
+    list_node_ptr list_node = list_get(countries_list, i);
+    char* country = (*(char**) list_node->data_);
+    fputs(country, fp);
+    fputs("\n", fp);
+  }
+  fclose(fp);
 }

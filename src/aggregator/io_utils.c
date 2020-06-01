@@ -18,6 +18,8 @@
 
 program_parameters_t parameters;
 
+volatile sig_atomic_t interrupt;
+
 jmp_buf jmp_exit;
 
 static struct option options[] = {
@@ -165,16 +167,16 @@ void __handle_command(char command[]) {
 
 void main_loop(void) {
   char command[MAX_BUFFER_SIZE];
-  while (1) {
-    if (setjmp(jmp_exit) == 1) {
-      aggregate_exit();
-    }
+  while (!interrupt) {
     /* Read command from the stdin */
     printf("> ");
     memset(&command, 0, sizeof(command));
-    fgets(command, MAX_BUFFER_SIZE, stdin);
+    if(fgets(command, MAX_BUFFER_SIZE, stdin) == NULL) {
+      break;
+    }
     command[strlen(command) - 1] = '\0';
     /* Handle command and call correspodent function until exit will be given */
     __handle_command(command);
   }
+  aggregate_exit();
 }

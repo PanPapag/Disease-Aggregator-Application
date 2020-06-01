@@ -2,13 +2,16 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "../../includes/aggregator/signals_handling.h"
 
-jmp_buf jmp_exit;
+volatile sig_atomic_t interrupt;
 
 static void handle_interrupt(int signo) {
-  longjmp(jmp_exit, 1);
+  interrupt = 1;
+  /* Close stdin in case of input */
+  close(0);
 }
 
 void register_signals_handlers(void) {

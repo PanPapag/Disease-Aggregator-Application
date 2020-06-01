@@ -335,6 +335,8 @@ int validate_exit(int argc, char** argv) {
 }
 
 void aggregate_exit() {
+  /* Create and write log file */
+  write_log_file(countries_names);
   /* Close file descriptors and delete named pipes */
   char fifo_1[parameters.num_workers][15], fifo_2[parameters.num_workers][15];
   for (size_t i = 0U; i < parameters.num_workers; ++i) {
