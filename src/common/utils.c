@@ -252,19 +252,33 @@ char* get_last_token(const char* str, char del) {
   return last_token+1;
 }
 
-void write_log_file(list_ptr countries_list) {
+void write_log_file(list_ptr countries_list, int success_cnt, int fail_cnt) {
   char log_file[15];
+  char buffer[MAX_BUFFER_SIZE];
+  /* Create log file */
   sprintf(log_file, "log_file.%d", getpid());
   FILE* fp = fopen(log_file, "w");
   if (fp == NULL) {
     report_error("Unable to create file %s. Exiting...", log_file);
     exit(EXIT_FAILURE);
   }
+  /* Write countries */
   for (size_t i = 1U; i <= list_size(countries_list); ++i) {
     list_node_ptr list_node = list_get(countries_list, i);
     char* country = (*(char**) list_node->data_);
     fputs(country, fp);
     fputs("\n", fp);
   }
+  /* Compute total number of requests */
+  int total = success_cnt + fail_cnt;
+  sprintf(buffer, "TOTAL %d\n", total);
+  fputs(buffer, fp);
+  /* Write success number of requests */
+  sprintf(buffer, "SUCCESS %d\n", success_cnt);
+  fputs(buffer, fp);
+  /* Write success number of requests */
+  sprintf(buffer, "FAIL %d\n", fail_cnt);
+  fputs(buffer, fp);
+  /* Close file pointer */
   fclose(fp);
 }

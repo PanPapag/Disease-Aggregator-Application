@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../../includes/common/hash_table.h"
 #include "../../includes/common/list.h"
@@ -24,6 +25,9 @@ list_ptr diseases_names;
 list_ptr files_statistics;
 
 worker_parameters_t parameters;
+
+int success_cnt;
+int fail_cnt;
 
 static inline
 void __count_patients_between(avl_node_ptr current_root,
@@ -84,6 +88,7 @@ void execute_disease_frequency(int argc, char** argv) {
   void* result = hash_table_find(disease_ht, argv[0]);
   if (result == NULL) {
     write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
+    fail_cnt++;
   } else {
     avl_ptr disease_avl = (avl_ptr) result;
     int num_patients;
@@ -95,6 +100,7 @@ void execute_disease_frequency(int argc, char** argv) {
     char num_patients_buffer[12];
     sprintf(num_patients_buffer, "%d", num_patients);
     write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
+    success_cnt++;
   }
 }
 
@@ -195,6 +201,7 @@ void execute_topk_age_ranges(char** argv) {
         char* age_group_name = get_age_group_name(age_groups_stats_entry->age_group);
         sprintf(output_buffer, "%s: %0.2f%%", age_group_name, age_group_per);
         write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
+        success_cnt++;
       }
     }
     /* Clear memory allocated */
@@ -209,9 +216,11 @@ void execute_search_patient_record(char** argv) {
   void* result = hash_table_find(patient_record_ht, argv[0]);
   if (result == NULL) {
     write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
+    fail_cnt++;
   } else {
     char* stringified_patient_record = patient_record_stringify(result);
     write_in_chunks(parameters.write_fd, stringified_patient_record, parameters.buffer_size);
+    success_cnt++;
     __FREE(stringified_patient_record);
   }
 }
@@ -220,6 +229,7 @@ void execute_num_patients_admissions(int argc, char** argv) {
   void* result = hash_table_find(disease_ht, argv[0]);
   if (result == NULL) {
     write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
+    fail_cnt++;
   } else {
     avl_ptr disease_avl = (avl_ptr) result;
     int num_patients;
@@ -234,12 +244,14 @@ void execute_num_patients_admissions(int argc, char** argv) {
         char output_buffer[MAX_BUFFER_SIZE];
         sprintf(output_buffer, "%s %d", country, num_patients);
         write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
+        success_cnt++;
       }
     } else {
       num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], argv[3]);
       char num_patients_buffer[12];
       sprintf(num_patients_buffer, "%d", num_patients);
       write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
+      success_cnt++;
     }
   }
 }
@@ -248,6 +260,7 @@ void execute_num_patients_discharges(int argc, char** argv) {
   void* result = hash_table_find(disease_ht, argv[0]);
   if (result == NULL) {
     write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
+    fail_cnt++;
   } else {
     avl_ptr disease_avl = (avl_ptr) result;
     int num_patients;
@@ -262,12 +275,14 @@ void execute_num_patients_discharges(int argc, char** argv) {
         char output_buffer[MAX_BUFFER_SIZE];
         sprintf(output_buffer, "%s %d", country, num_patients);
         write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
+        success_cnt++;
       }
     } else {
       num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], argv[3]);
       char num_patients_buffer[12];
       sprintf(num_patients_buffer, "%d", num_patients);
       write_in_chunks(parameters.write_fd, num_patients_buffer, parameters.buffer_size);
+      success_cnt++;
     }
   }
 }
@@ -335,8 +350,10 @@ int execute_insert_patient_record(patient_record_ptr patient_record,
                   patient_record->record_id);
     /* Delete patient record and return */
     patient_record_destroy(patient_record);
+    fail_cnt++;
     return ERROR;
   }
+  success_cnt++;
   return PASS;
 }
 
@@ -345,6 +362,7 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
   void* result = hash_table_find(patient_record_ht, id);
   if (result == NULL) {
     report_warning("Patient record with Record ID: <%s> not found.", id);
+    fail_cnt++;
     return ERROR;
   } else {
     // Cast result to patient record pointer
@@ -359,6 +377,7 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
     if (date_string_compare(entry_date_buffer, exit_date) > 0) {
       report_warning("Entry Date [%s] is after the given Exit Date [%s].",
                       entry_date_buffer, exit_date);
+      fail_cnt++;
       return ERROR;
     }
     /* Check if exit date is not specified */
@@ -369,9 +388,11 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
     } else {
       report_warning("Patient record Exit Date with Record ID: "
                      "<%s> is already specified.", id);
+      fail_cnt++;
       return ERROR;
     }
   }
+  success_cnt++;
   return PASS;
 }
 
@@ -383,5 +404,15 @@ void execute_exit(void) {
   list_clear(countries_names);
   list_clear(diseases_names);
   list_clear(files_statistics);
+  /* Write success_cnt and fail_cnt */
+  char buffer_success_cnt[12],  buffer_fail_cnt[12];
+  sprintf(buffer_success_cnt, "%d", success_cnt);
+  write_in_chunks(parameters.write_fd, buffer_success_cnt, parameters.buffer_size);
+  sprintf(buffer_fail_cnt, "%d", fail_cnt);
+  write_in_chunks(parameters.write_fd, buffer_fail_cnt, parameters.buffer_size);
+  /* Close file descriptors */
+  close(parameters.write_fd);
+  close(parameters.read_fd);
+  /* Exit Success */
   exit(EXIT_SUCCESS);
 }

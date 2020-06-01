@@ -134,7 +134,8 @@ void __handle_command(char* command) {
     execute_num_patients_discharges(command_argc, command_argv);
     __FREE(command_argv);
   } else if (!strcmp(command_tokens[0], "/exit")) {
-    printf("%s %ld\n", command_tokens[0], (long)getpid());
+    wordfree(&p);
+    execute_exit();
   }
   /* Free wordexp object */
   wordfree(&p);

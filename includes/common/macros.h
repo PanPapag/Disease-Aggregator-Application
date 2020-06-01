@@ -23,4 +23,6 @@
 
   #define NO_RESPONSE "-1"
 
+  #define FINISHED "FINISHED"
+
 #endif

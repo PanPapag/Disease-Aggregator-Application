@@ -7,7 +7,7 @@
   #include <time.h>
 
   #include "./list.h"
-  
+
   /* Converts a given string to 64 bits integer */
   uint8_t string_to_int64(char*, int64_t*);
 
@@ -80,7 +80,8 @@
 
   /* Returns the last token given a string and a delimiter */
   char* get_last_token(const char*, char);
-  /* Creates a log file while exiting - callable from both aggregator and workers */
-  void write_log_file(list_ptr);
+  
+  /* For creating a log file while exiting - callable from both aggregator and workers */
+  void write_log_file(list_ptr, int, int);
 
 #endif

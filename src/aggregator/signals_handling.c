@@ -1,8 +1,6 @@
-#include <setjmp.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "../../includes/aggregator/signals_handling.h"
 
@@ -10,8 +8,6 @@ volatile sig_atomic_t interrupt;
 
 static void handle_interrupt(int signo) {
   interrupt = 1;
-  /* Close stdin in case of input */
-  close(0);
 }
 
 void register_signals_handlers(void) {
@@ -26,5 +22,4 @@ void register_signals_handlers(void) {
     perror("sigaction");
     exit(1);
   }
-  printf("HERE\n");
 }

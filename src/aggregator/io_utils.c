@@ -151,7 +151,7 @@ void __handle_command(char command[]) {
   } else if (!strcmp(command_tokens[0], "/exit")) {
     if (validate_exit(command_no_tokens, command_tokens)) {
       wordfree(&p);
-      aggregate_exit();
+      aggregate_exit(command);
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
       fprintf(stderr, "Usage: /exit\n");
@@ -171,12 +171,12 @@ void main_loop(void) {
     /* Read command from the stdin */
     printf("> ");
     memset(&command, 0, sizeof(command));
-    if(fgets(command, MAX_BUFFER_SIZE, stdin) == NULL) {
+    if (fgets(command, MAX_BUFFER_SIZE, stdin) == NULL) {
       break;
     }
     command[strlen(command) - 1] = '\0';
     /* Handle command and call correspodent function until exit will be given */
     __handle_command(command);
   }
-  aggregate_exit();
+  aggregate_exit("/exit");
 }

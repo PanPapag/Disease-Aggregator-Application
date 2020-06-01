@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -334,9 +335,26 @@ int validate_exit(int argc, char** argv) {
   return argc == 1 ? VALID_COMMAND : INVALID_COMMAND;
 }
 
-void aggregate_exit() {
+void aggregate_exit(char* command) {
+  /* Send exit command to workers and kill thme */
+  char* result;
+  int total_success_cnt = 0;
+  int total_fail_cnt = 0;
+  for (size_t i = 0U; i < parameters.num_workers; ++i) {
+    write_in_chunks(parameters.workers_fd_1[i], command, parameters.buffer_size);
+    /* Read success_cnt from current worker */
+    result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+    total_success_cnt += atoi(result);
+    __FREE(result);
+    /* Read fail_cnt from current worker */
+    result = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+    total_fail_cnt += atoi(result);
+    __FREE(result);
+    /* Send SIGKILL signal */
+    kill(parameters.workers_pid[i], SIGKILL);
+  }
   /* Create and write log file */
-  write_log_file(countries_names);
+  write_log_file(countries_names, total_success_cnt, total_fail_cnt);
   /* Close file descriptors and delete named pipes */
   char fifo_1[parameters.num_workers][15], fifo_2[parameters.num_workers][15];
   for (size_t i = 0U; i < parameters.num_workers; ++i) {
@@ -353,5 +371,6 @@ void aggregate_exit() {
   free(parameters.workers_pid);
   list_clear(countries_names);
   hash_table_clear(country_to_pid_ht);
+  /* Exit Success */
   exit(EXIT_SUCCESS);
 }

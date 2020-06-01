@@ -29,8 +29,14 @@ extern list_ptr files_statistics;
 
 worker_parameters_t parameters;
 
+extern int success_cnt;
+extern int fail_cnt;
+
 int main(int argc, char* argv[]) {
-  // /* Extract command line arguments */
+  /* Initialize success_cnt and fail_cnt */
+  success_cnt = 0;
+  fail_cnt = 0;
+  /* Extract command line arguments */
   char* read_fifo = argv[1];
   char* write_fifo = argv[2];
   parameters.buffer_size = atoi(argv[3]);
@@ -72,7 +78,8 @@ int main(int argc, char* argv[]) {
     parse_directory(dir_path);
 		dir_path = strtok(NULL, SPACE);
 	}
-
+  /* Clear memory */
+  free(dir_paths);
   /* Open named pipe to write the statistics as well as the results from the commands */
   parameters.write_fd = open(write_fifo, O_WRONLY);
   if (parameters.write_fd < 0) {
@@ -83,22 +90,17 @@ int main(int argc, char* argv[]) {
   char num_files_buffer[12];
   sprintf(num_files_buffer, "%ld", list_size(files_statistics));
   write_in_chunks(parameters.write_fd, num_files_buffer, parameters.buffer_size);
+  success_cnt++;
   for (size_t i = 1U; i <= list_size(files_statistics); ++i) {
     list_node_ptr list_node = list_get(files_statistics, i);
     char* serialized_statistics_entry = ptr_to_statistics_entry_serialize(list_node->data_);
     write_in_chunks(parameters.write_fd, serialized_statistics_entry, parameters.buffer_size);
+    success_cnt++;
     free(serialized_statistics_entry);
   }
 
   /* Reading commands from parent process and writing the results back to him */
   worker_main_loop();
-
-  /* Close file descriptors */
-  close(parameters.write_fd);
-  close(parameters.read_fd);
-  /* Clear memory */
-  free(dir_paths);
-  execute_exit();
 
   return EXIT_SUCCESS;
 }
