@@ -1,5 +1,7 @@
 #include <fcntl.h>
 #include <getopt.h>
+#include <setjmp.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -15,6 +17,8 @@
 #include "../../includes/aggregator/utils.h"
 
 program_parameters_t parameters;
+
+jmp_buf jmp_exit;
 
 static struct option options[] = {
       {"w",    required_argument, NULL, 'w'},
@@ -145,7 +149,7 @@ void __handle_command(char command[]) {
   } else if (!strcmp(command_tokens[0], "/exit")) {
     if (validate_exit(command_no_tokens, command_tokens)) {
       wordfree(&p);
-      aggregate_exit(command);
+      aggregate_exit();
     } else {
       report_warning("Invalid <%s> command.", command_tokens[0]);
       fprintf(stderr, "Usage: /exit\n");
@@ -162,6 +166,9 @@ void __handle_command(char command[]) {
 void main_loop(void) {
   char command[MAX_BUFFER_SIZE];
   while (1) {
+    if (setjmp(jmp_exit) == 1) {
+      aggregate_exit();
+    }
     /* Read command from the stdin */
     printf("> ");
     memset(&command, 0, sizeof(command));
