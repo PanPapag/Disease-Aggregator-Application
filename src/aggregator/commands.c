@@ -137,6 +137,7 @@ int validate_topk_age_ranges(int argc, char** argv) {
     if (!is_valid_date_string(date2))
       return INVALID_COMMAND;
   }
+  return VALID_COMMAND;
 }
 
 void aggregate_topk_age_ranges(char** argv, char* command) {

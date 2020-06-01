@@ -98,8 +98,111 @@ void execute_disease_frequency(int argc, char** argv) {
   }
 }
 
+static inline
+void __update_patients_per_group(avl_node_ptr current_root,
+                                struct tm (*cmp_field)(patient_record_ptr),
+                                struct tm date1, struct tm date2,
+                                char* country, int** patients_per_group) {
+  avl_node_ptr temp = current_root;
+  patient_record_ptr patient_record = NULL;
+  /* Prune left search below this node as all entries have entry date < date1 */
+  if (temp != NULL) {
+    patient_record = (patient_record_ptr) temp->data_;
+    if (date_tm_compare(date1, cmp_field(patient_record)) <= 0) {
+      __update_patients_per_group(temp->left_, cmp_field, date1, date2,
+                                  country, patients_per_group);
+    }
+    patient_record = (patient_record_ptr) temp->data_;
+    /* Check if patient_record exit date is not specified */
+    if (date_tm_compare(cmp_field(patient_record), date2) <= 0) {
+      /* Check upper bound */
+      if (country != NULL) {
+        if (!strcmp(country, patient_record->country)) {
+          /* Update patients_per_group array */
+          int pos = get_age_group(patient_record->age);
+          (*patients_per_group)[pos]++;
+        }
+      }
+    }
+    __update_patients_per_group(temp->right_, cmp_field, date1, date2,
+                                country, patients_per_group);
+  }
+}
+
+static inline
+void __util_execute_topk_age_ranges(avl_ptr disease_avl,
+                                    struct tm (*cmp_field)(patient_record_ptr),
+                                    char* date1, char* date2, char* country,
+                                    int** patients_per_group) {
+  /* Convert string dates to struct tm format */
+  struct tm date1_tm;
+  memset(&date1_tm, 0, sizeof(struct tm));
+  strptime(date1, "%d-%m-%Y", &date1_tm);
+
+  struct tm date2_tm;
+  memset(&date2_tm, 0, sizeof(struct tm));
+  strptime(date2, "%d-%m-%Y", &date2_tm);
+  /*
+    Traverse inorder the AVL Tree and each time a patient record is found
+    between the given range increase the counter for current patients.
+    We can prune the traversal under the node in which a patient record has
+    entry date < date1 or exit date > date2.
+  */
+  __update_patients_per_group(disease_avl->root_, cmp_field, date1_tm, date2_tm,
+                              country, patients_per_group);
+}
+
 void execute_topk_age_ranges(char** argv) {
-  return;
+  int k = atoi(argv[0]);
+  char* country = argv[1];
+  char* disease = argv[2];
+  /* Get for the given country its AVL tree */
+  void* result = hash_table_find(disease_ht, disease);
+  if (result == NULL) {
+    write_in_chunks(parameters.write_fd, NO_RESPONSE, parameters.buffer_size);
+  } else {
+    avl_ptr disease_avl = (avl_ptr) result;
+    /* Store in a map like array num_patients per age group */
+    int* patients_per_group = (int*) calloc(NO_AGE_GROUPS, sizeof(int));
+    /* Update patients_per_group */
+    __util_execute_topk_age_ranges(disease_avl, get_entry_date, argv[3], argv[4],
+                                   country, &patients_per_group);
+    /* Copy patients_per_group content into struct age_groups_stats_t */
+    age_groups_stats_ptr age_groups_stats[NO_AGE_GROUPS];
+    int total_num_patients = 0;
+    for (int i = 0; i < NO_AGE_GROUPS; ++i) {
+      age_groups_stats[i] = (age_groups_stats_ptr) malloc(sizeof(*age_groups_stats[i]));
+      age_groups_stats[i]->age_group = i;
+      age_groups_stats[i]->no_patients = patients_per_group[i];
+      total_num_patients += patients_per_group[i];
+    }
+    __FREE(patients_per_group);
+    /*
+      Build on the fly a max heap and insert there the elements
+      of the patients_per_group map array
+    */
+    heap_ptr heap = heap_create(age_groups_stats_compare, NULL, NULL);
+    for (size_t i = 0U; i < NO_AGE_GROUPS; ++i) {
+      heap_insert_max(&heap, age_groups_stats[i]);
+    }
+    /* Extract top k */
+    for (size_t i = 0; i < k; ++i) {
+      result = heap_extract_max(&heap);
+      if (result != NULL) {
+        age_groups_stats_ptr age_groups_stats_entry = (age_groups_stats_ptr) result;
+        double age_group_per = (double) age_groups_stats_entry->no_patients / total_num_patients * 100;
+        char output_buffer[MAX_BUFFER_SIZE];
+        char* age_group_name = get_age_group_name(age_groups_stats_entry->age_group);
+        sprintf(output_buffer, "%s: %0.2f%%", age_group_name, age_group_per);
+        write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
+      }
+    }
+    /* Clear memory allocated */
+    heap_clear(heap);
+    for (int i = 0; i < NO_AGE_GROUPS; ++i) {
+      __FREE(age_groups_stats[i]);
+    }
+  }
 }
 
 void execute_search_patient_record(char** argv) {
@@ -126,10 +229,10 @@ void execute_num_patients_admissions(int argc, char** argv) {
       write_in_chunks(parameters.write_fd, num_writes_buffer, parameters.buffer_size);
       for (size_t i = 1U; i <= list_size(countries_names); ++i) {
         list_node_ptr list_node = list_get(countries_names, i);
-        char* country_name = (*(char**) list_node->data_);
-        num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], country_name);
+        char* country = (*(char**) list_node->data_);
+        num_patients = __num_patients_between(disease_avl, get_entry_date, argv[1], argv[2], country);
         char output_buffer[MAX_BUFFER_SIZE];
-        sprintf(output_buffer, "%s %d", country_name, num_patients);
+        sprintf(output_buffer, "%s %d", country, num_patients);
         write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
       }
     } else {
@@ -154,10 +257,10 @@ void execute_num_patients_discharges(int argc, char** argv) {
       write_in_chunks(parameters.write_fd, num_writes_buffer, parameters.buffer_size);
       for (size_t i = 1U; i <= list_size(countries_names); ++i) {
         list_node_ptr list_node = list_get(countries_names, i);
-        char* country_name = (*(char**) list_node->data_);
-        num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], country_name);
+        char* country = (*(char**) list_node->data_);
+        num_patients = __num_patients_between(disease_avl, get_exit_date, argv[1], argv[2], country);
         char output_buffer[MAX_BUFFER_SIZE];
-        sprintf(output_buffer, "%s %d", country_name, num_patients);
+        sprintf(output_buffer, "%s %d", country, num_patients);
         write_in_chunks(parameters.write_fd, output_buffer, parameters.buffer_size);
       }
     } else {

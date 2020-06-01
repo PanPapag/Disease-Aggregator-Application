@@ -185,6 +185,31 @@ int get_age_group(uint8_t age) {
   return -1;
 }
 
+char* get_age_group_name(int age_group_index) {
+  char* age_group_name = NULL;
+  switch (age_group_index) {
+    case AGE_GROUP_1:
+      age_group_name = "0-20";
+      break;
+    case AGE_GROUP_2:
+      age_group_name = "21-40";
+      break;
+    case AGE_GROUP_3:
+      age_group_name = "41-60";
+      break;
+    case AGE_GROUP_4:
+      age_group_name = "60+";
+      break;
+  }
+  return age_group_name;
+}
+
+int age_groups_stats_compare(void* a, void* b) {
+  age_groups_stats_ptr ags1 = (age_groups_stats_ptr) a;
+  age_groups_stats_ptr ags2 = (age_groups_stats_ptr) b;
+  return ags1->no_patients - ags2->no_patients;
+}
+
 void age_groups_print(void* v, FILE* out) {
   int* age_groups = (int*) v;
   fprintf(out, "Age range 0-20 years: %d cases\n", age_groups[0]);

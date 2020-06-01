@@ -10,7 +10,7 @@
   enum command_codes {
       INVALID_COMMAND,
       VALID_COMMAND
-    };
+  };
 
   void execute_disease_frequency(int, char**);
 
