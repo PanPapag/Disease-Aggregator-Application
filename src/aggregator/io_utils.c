@@ -1,6 +1,5 @@
 #include <fcntl.h>
 #include <getopt.h>
-#include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -14,13 +13,12 @@
 #include "../../includes/common/utils.h"
 #include "../../includes/aggregator/commands.h"
 #include "../../includes/aggregator/io_utils.h"
+#include "../../includes/aggregator/signals_handling.h"
 #include "../../includes/aggregator/utils.h"
 
 program_parameters_t parameters;
 
 volatile sig_atomic_t interrupt;
-
-jmp_buf jmp_exit;
 
 static struct option options[] = {
       {"w",    required_argument, NULL, 'w'},
@@ -166,6 +164,9 @@ void __handle_command(char command[]) {
 }
 
 void main_loop(void) {
+  /* At first register aggregator's signals handlers */
+  register_signals_handlers();
+  /* Begin main loop */
   char command[MAX_BUFFER_SIZE];
   while (!interrupt) {
     /* Read command from the stdin */
@@ -178,5 +179,6 @@ void main_loop(void) {
     /* Handle command and call correspodent function until exit will be given */
     __handle_command(command);
   }
+  /* In case of interrupt aggregate exit command */
   aggregate_exit("/exit");
 }

@@ -16,7 +16,6 @@
 #include "../../includes/common/statistics.h"
 #include "../../includes/common/utils.h"
 #include "../../includes/aggregator/io_utils.h"
-#include "../../includes/aggregator/signals_handling.h"
 #include "../../includes/aggregator/utils.h"
 
 extern hash_table_ptr country_to_pid_ht;
@@ -67,8 +66,6 @@ int main(int argc, char* argv[]) {
     perror("execl() Execution Failed");
     exit(EXIT_FAILURE);
   } else {
-    /* At first register aggregator's signals handlers */
-    register_signals_handlers();
     /*
       Initialize country_to_pid_ht. key: <country_name> -> value: <pid>
       which parsed the given country directory

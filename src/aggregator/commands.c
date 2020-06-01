@@ -336,7 +336,7 @@ int validate_exit(int argc, char** argv) {
 }
 
 void aggregate_exit(char* command) {
-  /* Send exit command to workers and kill thme */
+  /* Send exit command to workers and kill them */
   char* result;
   int total_success_cnt = 0;
   int total_fail_cnt = 0;
