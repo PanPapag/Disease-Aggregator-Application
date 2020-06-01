@@ -22,7 +22,7 @@
 
   void execute_search_patient_record(char**);
 
-  void execute_exit(void);
+  void execute_exit(int);
 
   int execute_insert_patient_record(patient_record_ptr, hash_table_ptr);
 

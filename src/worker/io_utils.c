@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -18,8 +19,11 @@
 #include "../../includes/worker/commands.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
+#include "../../includes/worker/signals_handling.h"
 
 list_ptr files_statistics;
+
+jmp_buf interrupt;
 
 void parse_directory(const char* dir_path) {
   hash_table_ptr age_groups_ht;
@@ -135,14 +139,22 @@ void __handle_command(char* command) {
     __FREE(command_argv);
   } else if (!strcmp(command_tokens[0], "/exit")) {
     wordfree(&p);
-    execute_exit();
+    execute_exit(0);
   }
   /* Free wordexp object */
   wordfree(&p);
 }
 
 void worker_main_loop(void) {
+  /* Register worker's signals handlers */
+  worker_register_handlers();
+  /* Enter worker main loop */
   while (1) {
+    /* Check for signal interrupt */
+    if (setjmp(interrupt) == 1) {
+      execute_exit(1);
+    }
+    /* Otherwise wait to read a command from aggregator */
     char* command = read_in_chunks(parameters.read_fd, parameters.buffer_size);
     __handle_command(command);
   }

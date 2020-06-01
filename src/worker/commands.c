@@ -1,8 +1,11 @@
+#include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <sys/types.h>
 
 #include "../../includes/common/hash_table.h"
 #include "../../includes/common/list.h"
@@ -15,6 +18,7 @@
 #include "../../includes/worker/heap.h"
 #include "../../includes/worker/io_utils.h"
 #include "../../includes/worker/patient_record.h"
+#include "../../includes/worker/signals_handling.h"
 
 hash_table_ptr country_ht;
 hash_table_ptr disease_ht;
@@ -396,7 +400,10 @@ int execute_record_patient_exit(char* id, const char* exit_date) {
   return PASS;
 }
 
-void execute_exit(void) {
+void execute_exit(int interrupted) {
+  if (interrupted) {
+    write_log_file(countries_names, success_cnt, fail_cnt);
+  }
   /* Free all memory allocated by the program */
   hash_table_clear(patient_record_ht);
   hash_table_clear(disease_ht);
