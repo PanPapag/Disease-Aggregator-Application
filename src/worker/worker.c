@@ -103,7 +103,8 @@ int main(int argc, char* argv[]) {
     success_cnt++;
     free(serialized_statistics_entry);
   }
-
+  /* We do not need file statistics any more so delete it */
+  list_clear(files_statistics);
   /* Reading commands from parent process and writing the results back to him */
   worker_main_loop();
 

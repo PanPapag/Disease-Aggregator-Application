@@ -413,7 +413,6 @@ void execute_exit(int interrupted) {
   hash_table_clear(country_ht);
   list_clear(countries_names);
   list_clear(diseases_names);
-  list_clear(files_statistics);
   /* Write success_cnt and fail_cnt */
   char buffer_success_cnt[12],  buffer_fail_cnt[12];
   sprintf(buffer_success_cnt, "%d", success_cnt);

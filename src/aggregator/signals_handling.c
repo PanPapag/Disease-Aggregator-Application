@@ -6,11 +6,14 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "../../includes/common/io_utils.h"
 #include "../../includes/common/macros.h"
+#include "../../includes/common/statistics.h"
 #include "../../includes/aggregator/signals_handling.h"
 #include "../../includes/aggregator/utils.h"
 
@@ -76,9 +79,33 @@ static void signal_handlers(int signo) {
         update_worker(new_pid, pos);
       }
     }
+  } else if (signo == SIGUSR2) {
+    /* Select from which file descriptor should read */
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    for (size_t i = 0U; i < parameters.num_workers; ++i) {
+      FD_SET(parameters.workers_fd_2[i], &rfds);
+    }
+    int retval = select(FD_SETSIZE, &rfds, NULL, NULL, NULL);
+     if (retval == -1) {
+       perror("select()");
+     } else if (retval) {
+       for (size_t i = 0U; i < parameters.num_workers; ++i) {
+         if (FD_ISSET(parameters.workers_fd_2[i], &rfds)) {
+           /* Read statistics from new files added */
+           char* num_files_buffer = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+           int num_files = atoi(num_files_buffer);
+           for (size_t j = 0; j < num_files; ++j) {
+             char* serialized_statistics_entry = read_in_chunks(parameters.workers_fd_2[i], parameters.buffer_size);
+             serialized_statistics_entry_print(serialized_statistics_entry);
+             __FREE(serialized_statistics_entry);
+           }
+           __FREE(num_files_buffer);
+         }
+       }
+     }
   }
 }
-
 
 void register_signals_handlers(void) {
   struct sigaction act;
@@ -96,6 +123,10 @@ void register_signals_handlers(void) {
   /* Do not allow SIGCHLD to interrupt I/O */
   act.sa_flags = SA_RESTART;
   if (sigaction(SIGCHLD, &act, NULL) == -1){
+    perror("sigaction");
+    exit(1);
+  }
+  if (sigaction(SIGUSR2, &act, NULL) == -1){
     perror("sigaction");
     exit(1);
   }

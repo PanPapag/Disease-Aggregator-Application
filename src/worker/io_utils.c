@@ -57,6 +57,9 @@ void parse_directory(const char* dir_path) {
             /* New File */
             age_groups_ht = parse_file_and_update_structures(dir_name, file_path,
                                                              direntp->d_name);
+            /* Store statistics */                                                 
+            statistics_entry = statistics_entry_create(direntp->d_name, dir_name, age_groups_ht);
+            list_push_back(&files_statistics, &statistics_entry);
           } else {
             __FREE(file_path);
           }
