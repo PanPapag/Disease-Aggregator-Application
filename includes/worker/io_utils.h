@@ -12,6 +12,7 @@
     size_t buffer_size;
     int write_fd;
     int read_fd;
+    char* dir_paths;
   } worker_parameters_t;
 
   extern worker_parameters_t parameters;

@@ -22,6 +22,7 @@
 
 hash_table_ptr country_ht;
 hash_table_ptr disease_ht;
+hash_table_ptr file_paths_ht;
 hash_table_ptr patient_record_ht;
 
 list_ptr countries_names;
@@ -404,8 +405,11 @@ void execute_exit(int interrupted) {
   if (interrupted) {
     write_log_file(countries_names, success_cnt, fail_cnt);
   }
+  hash_table_print(file_paths_ht, stdout);
   /* Free all memory allocated by the program */
+  __FREE(parameters.dir_paths);
   hash_table_clear(patient_record_ht);
+  hash_table_clear(file_paths_ht);
   hash_table_clear(disease_ht);
   hash_table_clear(country_ht);
   list_clear(countries_names);

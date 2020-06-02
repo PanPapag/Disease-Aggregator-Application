@@ -21,6 +21,7 @@
 
 extern hash_table_ptr country_ht;
 extern hash_table_ptr disease_ht;
+extern hash_table_ptr file_paths_ht;
 extern hash_table_ptr patient_record_ht;
 
 extern list_ptr countries_names;
@@ -55,7 +56,11 @@ int main(int argc, char* argv[]) {
                                  string_hash, string_compare,
                                  string_print, avl_print_inorder,
                                  NULL, avl_clear);
-
+  /* Create Files paths Hash Table */
+  file_paths_ht = hash_table_create(NO_BUCKETS, BUCKET_SIZE,
+                                    string_hash, string_compare,
+                                    string_print, string_print,
+                                    string_destroy, NULL);
   /* Initialize a list to store all disease names */
  	countries_names = list_create(STRING*, ptr_to_string_compare, ptr_to_string_print, NULL);
   /* Initialize a list to store all disease names */
@@ -72,14 +77,14 @@ int main(int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   }
   /* Read from the pipe the directories paths and parse them */
-  char* dir_paths = read_in_chunks(parameters.read_fd, parameters.buffer_size);
+  parameters.dir_paths = read_in_chunks(parameters.read_fd, parameters.buffer_size);
+  char dir_paths[MAX_BUFFER_SIZE];
+  strcpy(dir_paths, parameters.dir_paths);
   char* dir_path = strtok(dir_paths, SPACE);
 	while (dir_path != NULL) {
     parse_directory(dir_path);
 		dir_path = strtok(NULL, SPACE);
 	}
-  /* Clear memory */
-  free(dir_paths);
   /* Open named pipe to write the statistics as well as the results from the commands */
   parameters.write_fd = open(write_fifo, O_WRONLY);
   if (parameters.write_fd < 0) {

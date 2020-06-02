@@ -21,6 +21,8 @@
 #include "../../includes/worker/patient_record.h"
 #include "../../includes/worker/signals_handling.h"
 
+hash_table_ptr file_paths_ht;
+
 list_ptr files_statistics;
 
 jmp_buf interrupt;
@@ -47,6 +49,8 @@ void parse_directory(const char* dir_path) {
         }
         // Construct full file path
         snprintf(file_path, file_path_size, "%s/%s", dir_path, direntp->d_name);
+        /* Insert file path to file_paths_ht */
+        hash_table_insert(&file_paths_ht, file_path, file_path);
         // The parsing of the file and the update of the structures is executed
         // by the function below
         age_groups_ht = parse_file_and_update_structures(dir_name, file_path,
@@ -56,8 +60,6 @@ void parse_directory(const char* dir_path) {
         // fifo to the disease aggregator
         statistics_entry = statistics_entry_create(direntp->d_name, dir_name, age_groups_ht);
         list_push_back(&files_statistics, &statistics_entry);
-        // Deallocate memory for the next one
-        __FREE(file_path);
       }
     }
     closedir(dir_ptr);
