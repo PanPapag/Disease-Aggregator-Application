@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <getopt.h>
+#include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdint.h>

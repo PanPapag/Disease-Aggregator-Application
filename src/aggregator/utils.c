@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,13 +12,17 @@
 #include "../../includes/common/list.h"
 #include "../../includes/common/macros.h"
 #include "../../includes/common/io_utils.h"
+#include "../../includes/common/statistics.h"
 #include "../../includes/common/utils.h"
+#include "../../includes/aggregator/signals_handling.h"
 #include "../../includes/aggregator/utils.h"
 
 hash_table_ptr country_to_pid_ht;
 list_ptr countries_names;
 
 program_parameters_t parameters;
+
+volatile sig_atomic_t worker_replaced;
 
 list_ptr get_all_subdirs(char* parent_dir) {
   list_ptr result = list_create(STRING*, ptr_to_string_compare,
@@ -88,8 +93,49 @@ char** distribute_subdirs(list_ptr directories, size_t num_workers) {
     result[i] = (char*) malloc(strlen(buffer) + 1);
     strcpy(result[i], buffer);
   }
-
   return result;
+}
+
+void update_worker(pid_t pid, int pos) {
+  char workers_fifo_1[FIFO_NAME_SIZE];
+  char workers_fifo_2[FIFO_NAME_SIZE];
+  /* Store worker pid to global parameters */
+  parameters.workers_pid[pos] = pid;
+  printf("------------------------------- NEW PID: %d\n", pid);
+  /* Update for the current worker country_to_pid_ht */
+  update_country_to_pid_ht(parameters.worker_dir_paths[pos], parameters.workers_pid[pos]);
+  /* Reconstruct named pipes given the children proccesses ids */
+  sprintf(workers_fifo_1, "pw_cr_%d", parameters.workers_pid[pos]);
+  sprintf(workers_fifo_2, "pr_cw_%d", parameters.workers_pid[pos]);
+  /*
+    Open named pipe for writing the directories paths to be sent as well as
+    distributing the application commands given from stdin
+  */
+  parameters.workers_fd_1[pos] = open(workers_fifo_1, O_WRONLY);
+  if (parameters.workers_fd_1[pos] < 0) {
+    report_error("<diseaseAggregator> could not open named pipe: %s", workers_fifo_1);
+    exit(EXIT_FAILURE);
+  }
+  /* Write to the pipe the directories paths */
+  write_in_chunks(parameters.workers_fd_1[pos], parameters.worker_dir_paths[pos], parameters.buffer_size);
+  /*
+    Open named pipe for reading files statistics as well as the results
+    from the commands sent to workers
+  */
+  parameters.workers_fd_2[pos] = open(workers_fifo_2, O_RDONLY);
+  if (parameters.workers_fd_2[pos] < 0) {
+    report_error("<diseaseAggregator> could not open named pipe: %s", workers_fifo_2);
+    exit(EXIT_FAILURE);
+  }
+  /* Read from the pipe the files statistics */
+  char* num_files_buffer = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
+  int num_files = atoi(num_files_buffer);
+  for (size_t j = 0; j < num_files; ++j) {
+    char* serialized_statistics_entry = read_in_chunks(parameters.workers_fd_2[pos], parameters.buffer_size);
+    serialized_statistics_entry_print(serialized_statistics_entry);
+    __FREE(serialized_statistics_entry);
+  }
+  __FREE(num_files_buffer);
 }
 
 void update_country_to_pid_ht(char* worker_dir_paths, pid_t worker_pid) {
@@ -100,10 +146,17 @@ void update_country_to_pid_ht(char* worker_dir_paths, pid_t worker_pid) {
   char* worker_dir_path = strtok(buffer, SPACE);
   while (worker_dir_path != NULL) {
     char* country_name = get_last_token(worker_dir_path, '/');
-    char* ptr_to_country_name = string_create(country_name);
-    pid_t* ptr_to_worker_pid = pid_create(worker_pid);
-    hash_table_insert(&country_to_pid_ht, ptr_to_country_name, ptr_to_worker_pid);
-    list_sorted_insert(&countries_names, &ptr_to_country_name);
+    if (worker_replaced) {
+      void* result = hash_table_find(country_to_pid_ht, country_name);
+      pid_t* dead_pid = (pid_t*) result;
+      /* Store the new worker's pid */
+      *dead_pid = worker_pid;
+    } else {
+      char* ptr_to_country_name = string_create(country_name);
+      pid_t* ptr_to_worker_pid = pid_create(worker_pid);
+      hash_table_insert(&country_to_pid_ht, ptr_to_country_name, ptr_to_worker_pid);
+      list_sorted_insert(&countries_names, &ptr_to_country_name);
+    }
     worker_dir_path = strtok(NULL, SPACE);
   }
 }

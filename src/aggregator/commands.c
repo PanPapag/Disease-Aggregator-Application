@@ -336,6 +336,7 @@ int validate_exit(int argc, char** argv) {
 }
 
 void aggregate_exit(char* command) {
+  parameters.terminate_flag = 1;
   /* Send exit command to workers and kill them */
   char* result;
   int total_success_cnt = 0;
@@ -360,12 +361,14 @@ void aggregate_exit(char* command) {
   for (size_t i = 0U; i < parameters.num_workers; ++i) {
     close(parameters.workers_fd_1[i]);
     close(parameters.workers_fd_1[i]);
+    free(parameters.worker_dir_paths[i]);
     sprintf(fifo_1[i], "pw_cr_%d", parameters.workers_pid[i]);
     sprintf(fifo_2[i], "pr_cw_%d", parameters.workers_pid[i]);
     unlink(fifo_1[i]);
     unlink(fifo_2[i]);
   }
   /* Clear memory */
+  free(parameters.worker_dir_paths);
   free(parameters.workers_fd_1);
   free(parameters.workers_fd_2);
   free(parameters.workers_pid);
