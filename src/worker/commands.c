@@ -405,7 +405,6 @@ void execute_exit(int interrupted) {
   if (interrupted) {
     write_log_file(countries_names, success_cnt, fail_cnt);
   }
-  hash_table_print(file_paths_ht, stdout);
   /* Free all memory allocated by the program */
   __FREE(parameters.dir_paths);
   hash_table_clear(patient_record_ht);

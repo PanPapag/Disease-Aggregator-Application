@@ -25,6 +25,8 @@ hash_table_ptr file_paths_ht;
 
 list_ptr files_statistics;
 
+volatile sig_atomic_t new_files;
+
 jmp_buf interrupt;
 
 void parse_directory(const char* dir_path) {
@@ -49,17 +51,28 @@ void parse_directory(const char* dir_path) {
         }
         // Construct full file path
         snprintf(file_path, file_path_size, "%s/%s", dir_path, direntp->d_name);
-        /* Insert file path to file_paths_ht */
-        hash_table_insert(&file_paths_ht, file_path, file_path);
-        // The parsing of the file and the update of the structures is executed
-        // by the function below
-        age_groups_ht = parse_file_and_update_structures(dir_name, file_path,
-                                                         direntp->d_name);
-        // Create a statistics entry for the current file
-        // Store each statistics entry to a global list in order to send them via
-        // fifo to the disease aggregator
-        statistics_entry = statistics_entry_create(direntp->d_name, dir_name, age_groups_ht);
-        list_push_back(&files_statistics, &statistics_entry);
+        if (new_files == 1) {
+          void* result = hash_table_find(file_paths_ht, file_path);
+          if (result == NULL) {
+            /* New File */
+            age_groups_ht = parse_file_and_update_structures(dir_name, file_path,
+                                                             direntp->d_name);
+          } else {
+            __FREE(file_path);
+          }
+        } else {
+          /* Insert file path to file_paths_ht */
+          hash_table_insert(&file_paths_ht, file_path, file_path);
+          // The parsing of the file and the update of the structures is executed
+          // by the function below
+          age_groups_ht = parse_file_and_update_structures(dir_name, file_path,
+                                                           direntp->d_name);
+          // Create a statistics entry for the current file
+          // Store each statistics entry to a global list in order to send them via
+          // fifo to the disease aggregator
+          statistics_entry = statistics_entry_create(direntp->d_name, dir_name, age_groups_ht);
+          list_push_back(&files_statistics, &statistics_entry);
+        }
       }
     }
     closedir(dir_ptr);
