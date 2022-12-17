@@ -161,6 +161,22 @@ The user is able to give the following commands (arguments in [] are optional):
   Exiting the application. The parent process sends a SIGKILL signal to the Workers, waits for them to terminate, and prints to a file with the name log_file.xxx where xxx is the process ID of the parent process, the names of the subdirectories that "participated" in the application, the total number of requests received from the user and responded to successfully, and the total number of requests where an error occurred and/or were not completed. Before terminating, it will properly release all the reserved memory.
   
 ## Bash Script create_infiles.sh 
+
+It creates the test subdirectories and input files that can be used as data to run the application. 
+
+```./create_infiles.sh diseasesFile countriesFile input_dir numFilesPerDirectory numRecordsPerFile```
+
+- ```diseaseFile```: a file with names of diseases (one per line)
+- ```countriesFile```: a file with names of countries (one per line)
+- ```input_dir```: the name of a directory where the subdirectories and input files will be placed
+
+The script does the following:
+
+1. It performs input number checks.
+2. It reads the diseasesFile and countriesFile files.
+3. It creates a directory with the name given in the third argument, input_dir.
+4. Inside the directory, it creates subdirectories, one for each country name in the countriesFile.
+5. In each subdirectory, it creates numFilesPerDirectory files with the name of a date in the DD-MM-YYYY format. In each file, it places numRecordsPerFile following the format of the input files described above. For diseases, the script will randomly select one from the diseasesFile. For the name and surname, you can create random strings with a length ranging from 3 to 12 characters.
   
 ## System Design and Data Structures
 
