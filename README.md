@@ -67,7 +67,9 @@ For every worker process, for every directory assigned to it, it reads all of it
   Age range 60+ years: 450 cases
   ```
 
-These statistics are being sent for every input file (i.e. for every date file) by a worker. When a worker finishes reading its files and has sent all the summary statistics, it will notify the parent process via named pipe that it is ready to receive requests. If a worker receives a SIGINT or SIGQUIT signal, it will print in a file named log_file.xxx (where xxx is the process ID of the worker) the name of the countries (the subdirectories) it is handling, the total number of requests received from the parent process and the total number of requests answered successfully. 
+These statistics are being sent for every input file (i.e. for every date file) by a worker. When a worker finishes reading its files and has sent all the summary statistics, it will notify the parent process via named pipe that it is ready to receive requests. 
+
+If a worker receives a SIGINT or SIGQUIT signal, it will print in a file named log_file.xxx (where xxx is the process ID of the worker) the name of the countries (the subdirectories) it is handling, the total number of requests received from the parent process and the total number of requests answered successfully. 
 
 Logfile format:
 
@@ -80,4 +82,21 @@ Logfile format:
   FAIL 3487
   ```
 
+If a Worker receives a SIGUSR1 signal, this means that one or more new files have been placed in one of the subdirectories assigned to it. It will check the subdirectories to find the new files, read them, and update the data structures it keeps in memory. For each new file, it will send summary statistics to the parent process.
+
+If a Worker process terminates unexpectedly, the parent process will fork a new Worker process to replace it. 
+
+If the parent process receives SIGINT or SIGQUIT, it will first finish processing the current user command and after responding to the user, it will send a SIGKILL signal to the Workers, wait for them to terminate, and finally print to a file named log_file.xxx where xxx is the process ID of it, the name of all the countries (subdirectories) that "participated" in the application with data, the total number of requests received from the user and responded to successfully, and the total number of requests where some error occurred and/or were not completed.
+
+The user is able to give the following commands (arguments in [] are optional):
+
+* ```/listCountries```: 
+  The application will print each country along with the process ID of the Worker process that handles its files. This command is useful when the user wants to add new files for a country to be processed and needs to know which Worker process to send a notification to via the SIGUSR1 signal.
+
+  Output format: one line per country and process ID. Example:
+  ```
+  Canada 123
+  Italy 5769
+  China 5770
+  ```
 
