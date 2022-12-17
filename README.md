@@ -160,5 +160,32 @@ The user is able to give the following commands (arguments in [] are optional):
   
   Exiting the application. The parent process sends a SIGKILL signal to the Workers, waits for them to terminate, and prints to a file with the name log_file.xxx where xxx is the process ID of the parent process, the names of the subdirectories that "participated" in the application, the total number of requests received from the user and responded to successfully, and the total number of requests where an error occurred and/or were not completed. Before terminating, it will properly release all the reserved memory.
   
+## Bash Script create_infiles.sh 
   
-  
+## System Design and Data Structures
+
+![](system_design.png)
+
+We used the same data structures as in [Disease-Monitoring-Application](https://github.com/PanPapag/Disease-Monitoring-Application) to answer the queries.
+
+The named pipes were implemented in blocking (default) form.
+
+## Memory Allocation/Deallocation
+- Any memory allocation is done dynamically and is released when the program exits or as soon as it is no longer necessary.
+- When reading the file using fgets(), the line that is parsed is stored in a buffer of size 1025. Buffers of this size are also used in various other functions such as converting a date string to a struct tm date format (or vice versa).
+- The delete functions of the structures have been set up appropriately so that the hash table of records deletes all the memory that was reserved for the records and the other structures simply delete the memory that was reserved for themselves and not the value they store, thus avoiding issues such as double free and memory corruption.
+- The program has been extensively tested with valgrind and does not present any memory issues such as invalid read/write and memory leaks.
+
+## Validity checks
+
+- The program has a high level of validity checking, taking into account extreme conditions and user input. Specifically, it checks whenever possible if the members of a record follow the standards presented in the assignment statement. If something is given incorrectly, the program shows the user the correct way to execute a query or the correct way to pass the command line parameters.
+- Due to the extensive checking that is done during the insertion of a record, whether all the fields have been given correctly, the construction of the initial structures for the application startup may be delayed depending on the size of the input file.
+
+## Compilation and Run
+Type ```make```.
+
+The executable will be under the folder ```build```.
+
+## License
+
+This project is licensed under the MIT License.
