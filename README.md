@@ -90,7 +90,8 @@ If the parent process receives SIGINT or SIGQUIT, it will first finish processin
 
 The user is able to give the following commands (arguments in [] are optional):
 
-* ```/listCountries```: 
+* ```/listCountries```
+
   The application will print each country along with the process ID of the Worker process that handles its files. This command is useful when the user wants to add new files for a country to be processed and needs to know which Worker process to send a notification to via the SIGUSR1 signal.
 
   Output format: one line per country and process ID. Example:
@@ -99,4 +100,24 @@ The user is able to give the following commands (arguments in [] are optional):
   Italy 5769
   China 5770
   ```
+  
+* ```/diseaseFrequency virusName date1 date2 [country]```
 
+  If the ```country``` argument is not given, the application will print the number of cases of the disease ```virusName``` recorded in the system within the period ```[date1...date2]```. If the ```country``` argument is given, the application will print the number of cases of the disease ```virusName``` in the ```country``` recorded within the period ```[date1...date2]```. The ```date1``` and ```date2``` arguments will have the format DD-MM-YYYY.
+
+  Output format: one line with the number of cases. Example:
+  ```
+  153
+  ```
+  
+* ```/topk-AgeRanges k country disease date1 date2```
+
+  The application will print the top k age categories for the ```country``` and ```disease``` that have reported cases of the specific disease in the specific country and the percentage of cases for them. The ```date1``` and ```date2``` arguments will be in the form DD-MM-YYYY. 
+  
+  Output format: one line for each age category. Example with k=2:
+  ```
+  20-30: 40% 
+  60+: 30%
+  ```
+  
+ * ```/searchPatientRecord recordID```
