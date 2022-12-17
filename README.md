@@ -121,3 +121,44 @@ The user is able to give the following commands (arguments in [] are optional):
   ```
   
  * ```/searchPatientRecord recordID```
+
+    The parent process sends the request to all Workers through named pipes and waits for a response from the Worker with the record recordID. When it receives it, it prints it.
+
+    An example of someone who entered the hospital on 23-02-2020 and left on 28-02-2020:
+    ```
+    776 Larry Jones SARS-1 87 23-2-2020 28-2-2020
+    ```
+
+    An example of someone who entered the hospital on 23-02-2020 and hasn't left yet:
+    ```
+    776 Larry Jones SARS-1 87 23-2-2020 --
+    ```
+  
+* ```/numPatientAdmissions disease date1 date2 [country]```
+
+  If a ```country``` argument is given, the application will print, on a new line, the total number of patients with the ```disease``` who entered the hospital in that country within the period ```[date1 date2]```. If no ```country``` argument is given, the application will print, for each country, the number of patients with the ```disease``` who entered the hospital in the period ```[date1 date2]```. The ```date1 date2``` arguments will be in the DD-MM-YYYY format.
+  
+  Output format: 
+  ```
+  Italy 153
+  Spain 769
+  France 570
+  ```
+  
+ * ```/numPatientDischarges disease date1 date2 [country]```
+
+    If the ```country``` argument is given, the application will print, on a new line, the total number of patients with the ```disease``` who have left the hospital in that country within the period ```[date1 date2]```. If no ```country``` argument is given, the application will print, for each country, the number of patients with the ```disease``` who have left the hospital in the period ```[date1 date2]```. The ```date1 date2``` arguments will be in the DD-MM-YYYY format.
+
+    Output format: 
+    ```
+    Italy 153
+    Spain 769
+    France 570
+    ```
+  
+* ```/exit```
+  
+  Exiting the application. The parent process sends a SIGKILL signal to the Workers, waits for them to terminate, and prints to a file with the name log_file.xxx where xxx is the process ID of the parent process, the names of the subdirectories that "participated" in the application, the total number of requests received from the user and responded to successfully, and the total number of requests where an error occurred and/or were not completed. Before terminating, it will properly release all the reserved memory.
+  
+  
+  
